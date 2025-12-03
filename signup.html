@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="hero-header">
+        <h1><i class="fas fa-user-plus"></i> Đăng Ký Tài Khoản</h1>
+        <nav><a href="index.html" class="btn btn-link"><i class="fas fa-home"></i> Trang Chủ</a></nav>
+    </header>
+    <main class="home">
+        <div class="auth-card">
+            <h2><i class="fas fa-user-circle"></i> Tạo Tài Khoản Mới</h2>
+            <form id="signup-form">
+                <input type="email" id="signup-email" placeholder="Email của bạn 📧" required>
+                <input type="password" id="signup-password" placeholder="Mật khẩu (ít nhất 6 ký tự) 🔒" minlength="6" required>
+                <input type="password" id="confirm-password" placeholder="Xác nhận mật khẩu 🔒" minlength="6" required>
+                <button type="submit" class="btn btn-primary">Đăng Ký</button>
+                <p>Đã có tài khoản? <a href="index.html">Đăng nhập ngay!</a></p>
+            </form>
+            <div id="signup-message"></div>
+        </div>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

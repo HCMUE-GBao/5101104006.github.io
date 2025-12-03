@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Trắc Nghiệm</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="hero-header">
+        <h1><i class="fas fa-brain"></i> Quiz Trắc Nghiệm <i class="fas fa-brain"></i></h1>
+        <p>Thử thách kiến thức của bạn! 🎉</p>
+    </header>
+    <main class="home">
+        <div class="auth-card">
+            <h2><i class="fas fa-sign-in-alt"></i> Đăng Nhập</h2>
+            <form id="auth-form">
+                <input type="email" id="email" placeholder="Email của bạn 📧" required>
+                <input type="password" id="password" placeholder="Mật khẩu 🔒" required>
+                <button type="submit" id="login-btn" class="btn btn-primary">Đăng Nhập</button>
+                <p>Chưa có tài khoản? <a href="signup.html" id="signup-link">Đăng ký ngay!</a></p>
+            </form>
+            <div id="auth-message"></div>
+        </div>
+        <div class="actions" id="user-actions" style="display: none;">
+            <a href="create-quiz.html" class="btn btn-primary"><i class="fas fa-plus"></i> Tạo Quiz</a>
+            <a href="play-quiz.html" class="btn btn-secondary"><i class="fas fa-play"></i> Chơi Quiz</a>
+            <button id="logout-btn" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</button>
+        </div>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

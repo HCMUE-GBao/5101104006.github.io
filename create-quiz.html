@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Quiz</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="hero-header">
+        <h1><i class="fas fa-edit"></i> Tạo Quiz Trắc Nghiệm</h1>
+        <nav><a href="index.html" class="btn btn-link"><i class="fas fa-home"></i> Trang Chủ</a></nav>
+    </header>
+    <main class="create-quiz">
+        <div class="form-card">
+            <form id="quiz-form">
+                <label><i class="fas fa-heading"></i> Tiêu Đề Quiz: <input type="text" id="quiz-title" required></label>
+                <label><i class="fas fa-clock"></i> Thời Gian (Phút): <input type="number" id="quiz-time" min="1" required></label>
+                <div id="questions-container">
+                    <!-- Question Card Mặc Định với 2 Đáp Án -->
+                    <div class="question-card">
+                        <label><i class="fas fa-question"></i> Câu Hỏi: <input type="text" class="question" required></label>
+                        <div class="answers">
+                            <div class="answer-item">
+                                <input type="text" class="answer" placeholder="Đáp Án 1 ✅" required>
+                                <button type="button" class="remove-answer" style="display: none;"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="answer-item">
+                                <input type="text" class="answer" placeholder="Đáp Án 2 ✅" required>
+                                <button type="button" class="remove-answer" style="display: none;"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                        <button type="button" class="add-answer btn btn-success"><i class="fas fa-plus"></i> Thêm Đáp Án</button>
+                        <select class="correct-answer">
+                            <option value="0">Đáp Án Đúng: 1</option>
+                            <option value="1">Đáp Án Đúng: 2</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="button" id="add-question" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm Câu Hỏi</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-download"></i> Tạo & Tải JSON</button>
+            </form>
+            <div id="quiz-message"></div>
+        </div>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
