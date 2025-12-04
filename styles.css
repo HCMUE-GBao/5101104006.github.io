@@ -148,12 +148,14 @@ main {
 /* Bố cục cho nhóm nút actions */
 .actions {
     display: flex;
-    max-width: 700px;
-    margin: 2rem auto; 
-    justify-content: space-between; 
+    justify-content: center; 
     align-items: center; 
+    gap: 3rem;
+    margin: 2rem auto; 
+    max-width: 1200px;
     padding: 0 20px; 
 }
+
 .actions .btn {
     width: 180px; 
     min-width: 150px; 
@@ -175,8 +177,7 @@ main {
     }
     .actions .btn {
         width: 100%; 
-        max-width: none;
-        min-width: 100px; 
+        min-width: auto;
     }
 }
 
