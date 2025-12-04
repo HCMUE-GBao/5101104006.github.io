@@ -241,7 +241,7 @@ if (document.getElementById('upload-json')) {
         updateQuestionNav();
         showQuestion();
     }
-   function updateQuestionNav() {
+    function updateQuestionNav() {
     const nav = document.getElementById('question-nav');
     nav.innerHTML = '';
 
@@ -249,15 +249,17 @@ if (document.getElementById('upload-json')) {
         const btn = document.createElement('button');
         btn.textContent = i + 1;
 
-        // Ô đang làm
-        btn.classList.toggle('active', i === currentQuestion);
+        // Nút active (câu hiện tại)
+        if (i === currentQuestion) {
+            btn.classList.add('active');
+        }
 
-        // Không cho click nhưng hiển thị như nút bình thường
-        btn.style.pointerEvents = "none";
+        // Không cho bấm
+        btn.disabled = true;
 
         nav.appendChild(btn);
     });
-}
+    }
     function showQuestion() {
         const q = quiz.questions[currentQuestion];
         document.getElementById('question-text').textContent = q.question;
