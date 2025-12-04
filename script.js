@@ -236,11 +236,12 @@ if (document.getElementById('upload-json')) {
         reader.readAsText(file);
     });
     function displayQuiz() {
-        quizDisplay.style.display = 'block';
-        document.getElementById('quiz-title').textContent = quiz.title;
-        updateQuestionNav();
-        showQuestion();
-    }
+    quizDisplay.style.display = 'block';
+    document.getElementById('upload-card').style.display = 'none';  // Thêm dòng này để ẩn khung upload
+    document.getElementById('quiz-title').textContent = quiz.title;
+    updateQuestionNav();
+    showQuestion();
+}
     function updateQuestionNav() {
     const nav = document.getElementById('question-nav');
     nav.innerHTML = '';
@@ -312,23 +313,3 @@ if (document.getElementById('upload-json')) {
         document.getElementById('score').textContent = `Bạn trả lời đúng ${score}/${quiz.questions.length} câu.`;
     }
 }
-
-
-document.getElementById("upload-json").addEventListener("change", function () {
-    const file = this.files[0];
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-        const quiz = JSON.parse(e.target.result);
-
-        // ẨN KHUNG UPLOAD
-        document.getElementById("upload-card").style.display = "none";
-
-        // HIỆN NỘI DUNG QUIZ
-        document.getElementById("quiz-display").style.display = "block";
-
-        loadQuiz(quiz);
-    };
-
-    reader.readAsText(file);
-});
