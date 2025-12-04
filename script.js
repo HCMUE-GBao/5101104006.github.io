@@ -242,16 +242,7 @@ if (document.getElementById('upload-json')) {
         showQuestion();
     }
     function updateQuestionNav() {
-        const nav = document.getElementById('question-nav');
-        nav.innerHTML = '';
-        quiz.questions.forEach((_, i) => {
-            const btn = document.createElement('button');
-            btn.textContent = i + 1;
-            btn.classList.toggle('active', i === currentQuestion);
-            btn.addEventListener('click', () => { currentQuestion = i; showQuestion(); updateQuestionNav(); });
-            nav.appendChild(btn);
-        });
-    }
+    }  
     function showQuestion() {
         const q = quiz.questions[currentQuestion];
         document.getElementById('question-text').textContent = q.question;
