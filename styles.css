@@ -156,7 +156,7 @@ main {
     padding: 0 20px; 
 }
 .actions a.btn {
-    text-decoration: none;
+    text-decoration: none !important;
 }
 .actions .btn {
     width: 180px; 
