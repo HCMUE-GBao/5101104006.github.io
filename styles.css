@@ -153,6 +153,12 @@ main {
     gap: 1rem; /* Khoảng cách đều giữa các nút */
     flex-wrap: wrap; /* Cho phép xuống dòng nếu không đủ chỗ */
     margin: 1rem 0; /* Khoảng cách trên/dưới để tách biệt với nội dung khác */
+    width: 100%; /* Chiếm toàn chiều rộng để căn giữa */
+}
+.actions .btn {
+    flex: 1; /* Chia đều chiều rộng cho mỗi nút */
+    max-width: 200px; /* Giới hạn chiều rộng tối đa để tránh quá rộng (có thể điều chỉnh, ví dụ: 250px nếu muốn lớn hơn) */
+    min-width: 120px; /* Đảm bảo nút không quá nhỏ trên màn hình hẹp */
 }
 /* Responsive */
 @media (max-width: 768px) {
@@ -166,7 +172,9 @@ main {
         align-items: stretch; /* Nút mở rộng toàn chiều rộng để dễ chạm */
     }
     .actions .btn {
+        flex: none; /* Bỏ chia đều trên mobile, để nút tự nhiên */
         width: 100%; /* Nút chiếm toàn bộ chiều rộng trên mobile */
+        max-width: none; /* Bỏ giới hạn để dễ chạm */
         justify-content: center; /* Căn giữa nội dung nút */
     }
 }
