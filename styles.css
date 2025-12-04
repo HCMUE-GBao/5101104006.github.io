@@ -155,10 +155,19 @@ main {
     margin: 1rem 0; /* Khoảng cách trên/dưới để tách biệt với nội dung khác */
     width: 100%; /* Chiếm toàn chiều rộng để căn giữa */
 }
+.actions {
+    display: flex;
+    max-width: 700px;     
+    margin: 2rem auto; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 0 1rem; 
+}
 .actions .btn {
-    flex: 1; /* Chia đều chiều rộng cho mỗi nút */
-    max-width: 200px; /* Giới hạn chiều rộng tối đa để tránh quá rộng (có thể điều chỉnh, ví dụ: 250px nếu muốn lớn hơn) */
-    min-width: 120px; /* Đảm bảo nút không quá nhỏ trên màn hình hẹp */
+    width: 180px; 
+    max-width: none;
+    min-width: 150px; 
+    justify-content: center; 
 }
 /* Responsive */
 @media (max-width: 768px) {
@@ -167,15 +176,16 @@ main {
     .hero-header h1 { font-size: 2rem; }
     .btn { padding: 0.5rem 1rem; }
     .actions {
-        flex-direction: column; /* Bố trí dọc trên mobile */
-        gap: 0.75rem; /* Giảm khoảng cách một chút trên mobile */
-        align-items: stretch; /* Nút mở rộng toàn chiều rộng để dễ chạm */
+        flex-direction: column; 
+        gap: 1rem; 
+        align-items: stretch;
+        max-width: 100%; 
+        margin: 1rem auto;
     }
     .actions .btn {
-        flex: none; /* Bỏ chia đều trên mobile, để nút tự nhiên */
-        width: 100%; /* Nút chiếm toàn bộ chiều rộng trên mobile */
-        max-width: none; /* Bỏ giới hạn để dễ chạm */
-        justify-content: center; /* Căn giữa nội dung nút */
+        width: 100%; 
+        max-width: none;
+        min-width: 100px; 
     }
 }
 
