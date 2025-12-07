@@ -193,6 +193,7 @@ if (document.getElementById('quiz-form')) {
     }
     // Gắn sự kiện cho question card đầu tiên
     attachAnswerEvents(questionsContainer.querySelector('.question-card'));
+}
     
 // Play Quiz Logic (for play-quiz.html)
 if (document.getElementById('upload-json')) {
