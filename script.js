@@ -305,6 +305,48 @@ function initPlayQuiz() {
     };
     reader.readAsText(file);
   });
+  // ---------- LOAD QUIZ BY ACCESS CODE ----------
+const accessInput = $('#access-code-input');
+const loadCodeBtn = $('#load-code-btn');
+const loadCodeMsg = $('#load-code-msg');
+
+if (loadCodeBtn) {
+  loadCodeBtn.addEventListener('click', async () => {
+    const code = (accessInput?.value || '').trim().toLowerCase();
+    if (!code) {
+      showMsg(loadCodeMsg, 'Vui lòng nhập mã truy cập.', 'error');
+      return;
+    }
+
+    try {
+      showMsg(loadCodeMsg, 'Đang tải...', '');
+
+      const snap = await db.collection('quizzes')
+        .where('accessCode', '==', code)
+        .limit(1)
+        .get();
+
+      if (snap.empty) {
+        showMsg(loadCodeMsg, 'Không tìm thấy quiz với mã này.', 'error');
+        return;
+      }
+
+      quiz = snap.docs[0].data();
+
+      if (!quiz || !quiz.title || !Array.isArray(quiz.questions) || typeof quiz.time !== 'number') {
+        showMsg(loadCodeMsg, 'Quiz bị lỗi dữ liệu.', 'error');
+        return;
+      }
+
+      showMsg(loadCodeMsg, 'Tải thành công! Bắt đầu...', 'success');
+
+      startQuiz();
+    } catch (err) {
+      console.error('Load code error:', err);
+      showMsg(loadCodeMsg, 'Lỗi khi tải quiz. Kiểm tra console.', 'error');
+    }
+  });
+}
 
   // start
   function startQuiz() {
