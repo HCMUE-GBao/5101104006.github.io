@@ -412,43 +412,6 @@ function generateAccessCode() {
     return code;
 }
   
-// Xử lý khi người dùng bấm "Tạo Quiz"
-document.getElementById('quiz-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    // Lấy thông tin từ form
-    const quizTitle = document.getElementById('quiz-title').value.trim();
-    const quizTime = document.getElementById('quiz-time').value.trim();
-    const questions = [];
-
-    // Lấy thông tin câu hỏi và đáp án
-    document.querySelectorAll('.question-card').forEach((card) => {
-        const questionText = card.querySelector('.question').value.trim();
-        const point = parseInt(card.querySelector('.point').value);
-        const answers = [];
-        card.querySelectorAll('.answer').forEach((input) => {
-            answers.push(input.value.trim());
-        });
-        const correctAnswer = parseInt(card.querySelector('.correct-answer').value);
-
-        questions.push({
-            question: questionText,
-            point: point,
-            answers: answers,
-            correct: correctAnswer
-        });
-    });
-
-    const quizData = {
-        title: quizTitle,
-        time: parseInt(quizTime),
-        questions: questions
-    };
-
-    // Lưu quiz vào Firestore và tạo mã truy cập
-    saveQuizToFirestore(quizData);
-});
-
 // Lưu quiz vào Firestore
 function saveQuizToFirestore(quizData) {
     const quizId = db.collection('quizzes').doc().id;  // Tạo ID ngẫu nhiên cho quiz mới
