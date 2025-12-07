@@ -327,8 +327,11 @@ if (document.getElementById('upload-json')) {
     }
 }
 
-// Lưu Quiz //
-const quizId = generateQuizId();
+// Khai báo một lần, dùng let vì sẽ gán lại khi tải quiz
+let quizId;
+
+// Tạo quiz mới
+quizId = generateQuizId();
 db.collection("quizzes").doc(quizId).set(quiz)
   .then(() => {
       message.textContent = `Tạo quiz thành công! ID: ${quizId}`;
@@ -343,11 +346,13 @@ db.collection("quizzes").doc(quizId).set(quiz)
       message.textContent = "Lỗi khi lưu quiz: " + err.message;
       message.className = 'error';
   });
+
 // Generate Link //
 function generateQuizId() {
     const part = () => Math.random().toString(36).substring(2, 5);
     return `${part()}-${part()}-${part()}`;
 }
+
 // Tải Quiz bằng ID //
 document.getElementById("load-quiz-btn").addEventListener("click", () => {
     const id = document.getElementById("quiz-id-input").value.trim();
@@ -359,12 +364,13 @@ document.getElementById("load-quiz-btn").addEventListener("click", () => {
         }
 
         quiz = doc.data();
-        quizId = id;
+        quizId = id; // gán lại giá trị
         startQuiz();
     });
 });
-// Chọn câu bất kỳ //
-let quiz, quizId;
+
+// Khởi tạo biến dùng chung
+let quiz;
 let currentQuestion = 0;
 let answersChosen = {}; // {0: 2, 1: 0, ...}
 
