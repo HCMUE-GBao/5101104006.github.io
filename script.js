@@ -395,3 +395,158 @@ function showResults() {
         `).join("")}
     `;
 }
+
+// Hàm tạo mã truy cập ngẫu nhiên (abc-xyz-def)
+function generateAccessCode() {
+    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let code = '';
+    for (let i = 0; i < 3; i++) {
+        let segment = '';
+        for (let j = 0; j < 3; j++) {
+            segment += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        code += segment;
+        if (i < 2) code += '-'; // Thêm dấu '-'
+    }
+    return code;
+}
+
+// Lưu quiz vào Firestore
+function saveQuizToFirestore(quizData) {
+    const quizId = db.collection('quizzes').doc().id;  // Tạo ID ngẫu nhiên cho quiz mới
+    const accessCode = generateAccessCode();  // Tạo mã truy cập ngẫu nhiên
+
+    const quizRef = db.collection('quizzes').doc(quizId);
+    quizRef.set({
+        title: quizData.title,
+        time: quizData.time,
+        questions: quizData.questions,
+        accessCode: accessCode,  // Lưu mã truy cập
+    })
+    .then(() => {
+        console.log("Quiz saved to Firestore.");
+        showSuccessMessage(accessCode);  // Hiển thị thông báo thành công
+    })
+    .catch((error) => {
+        console.error("Error saving quiz: ", error);
+        alert("Có lỗi xảy ra khi lưu quiz.");
+    });
+}
+  
+// Xử lý khi người dùng bấm "Tạo Quiz"
+document.getElementById('quiz-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    // Lấy thông tin từ form
+    const quizTitle = document.getElementById('quiz-title').value.trim();
+    const quizTime = document.getElementById('quiz-time').value.trim();
+    const questions = [];
+
+    // Lấy thông tin câu hỏi và đáp án
+    document.querySelectorAll('.question-card').forEach((card) => {
+        const questionText = card.querySelector('.question').value.trim();
+        const point = parseInt(card.querySelector('.point').value);
+        const answers = [];
+        card.querySelectorAll('.answer').forEach((input) => {
+            answers.push(input.value.trim());
+        });
+        const correctAnswer = parseInt(card.querySelector('.correct-answer').value);
+
+        questions.push({
+            question: questionText,
+            point: point,
+            answers: answers,
+            correct: correctAnswer
+        });
+    });
+
+    const quizData = {
+        title: quizTitle,
+        time: parseInt(quizTime),
+        questions: questions
+    };
+
+    // Lưu quiz vào Firestore và tạo mã truy cập
+    saveQuizToFirestore(quizData);
+});
+
+// Hàm tạo mã truy cập ngẫu nhiên (abc-xyz-def)
+function generateAccessCode() {
+    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let code = '';
+    for (let i = 0; i < 3; i++) {
+        let segment = '';
+        for (let j = 0; j < 3; j++) {
+            segment += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        code += segment;
+        if (i < 2) code += '-'; // Thêm dấu '-'
+    }
+    return code;
+}
+
+// Lưu quiz vào Firestore
+function saveQuizToFirestore(quizData) {
+    const quizId = db.collection('quizzes').doc().id;  // Tạo ID ngẫu nhiên cho quiz mới
+    const accessCode = generateAccessCode();  // Tạo mã truy cập ngẫu nhiên
+
+    const quizRef = db.collection('quizzes').doc(quizId);
+    quizRef.set({
+        title: quizData.title,
+        time: quizData.time,
+        questions: quizData.questions,
+        accessCode: accessCode,  // Lưu mã truy cập
+    })
+    .then(() => {
+        console.log("Quiz saved to Firestore.");
+        showSuccessMessage(accessCode);  // Hiển thị thông báo thành công
+    })
+    .catch((error) => {
+        console.error("Error saving quiz: ", error);
+        alert("Có lỗi xảy ra khi lưu quiz.");
+    });
+}
+
+// Hiển thị thông báo thành công và mã truy cập
+function showSuccessMessage(accessCode) {
+    const messageDiv = document.getElementById('quiz-message');
+    messageDiv.textContent = `Tạo Quiz thành công! Mã của bạn là: ${accessCode}`;
+    messageDiv.className = 'success';  // Thêm lớp để hiển thị thông báo thành công
+}
+
+// Xử lý khi người dùng bấm "Tạo Quiz"
+document.getElementById('quiz-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    // Lấy thông tin từ form
+    const quizTitle = document.getElementById('quiz-title').value.trim();
+    const quizTime = document.getElementById('quiz-time').value.trim();
+    const questions = [];
+
+    // Lấy thông tin câu hỏi và đáp án
+    document.querySelectorAll('.question-card').forEach((card) => {
+        const questionText = card.querySelector('.question').value.trim();
+        const point = parseInt(card.querySelector('.point').value);
+        const answers = [];
+        card.querySelectorAll('.answer').forEach((input) => {
+            answers.push(input.value.trim());
+        });
+        const correctAnswer = parseInt(card.querySelector('.correct-answer').value);
+
+        questions.push({
+            question: questionText,
+            point: point,
+            answers: answers,
+            correct: correctAnswer
+        });
+    });
+
+    const quizData = {
+        title: quizTitle,
+        time: parseInt(quizTime),
+        questions: questions
+    };
+
+      // Lưu quiz vào Firestore và tạo mã truy cập
+    saveQuizToFirestore(quizData);
+});
