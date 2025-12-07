@@ -506,7 +506,7 @@ document.getElementById('quiz-form').addEventListener('submit', (e) => {
 
     const quizData = {
         title: quizTitle,
-        time: parseInt(quizTime),
+        time: parseInt(quizTime), }
         questions: questions
     };
 
