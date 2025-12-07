@@ -7,11 +7,9 @@ var firebaseConfig = {
   messagingSenderId: "847360348342",
   appId: "1:847360348342:web:d16d48c63511cd613c1617"
 };
-
 // Khởi tạo Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-
 // ============================
 // 2. Xử lý đăng nhập
 // ============================
@@ -35,26 +33,22 @@ authForm.addEventListener("submit", function (e) {
             authMessage.textContent = "❌ " + error.message;
         });
 });
-
-
 // ============================
 // 3. Theo dõi trạng thái đăng nhập (auto)
 // ============================
 auth.onAuthStateChanged((user) => {
     if (user) {
-        // Đã đăng nhập → Ẩn form, hiện các nút chức năng
         authForm.style.display = "none";
         userActions.style.display = "flex";
         authMessage.textContent = `👋 Xin chào, ${user.email}`;
         authMessage.style.color = "green";
-    } else {
-        // Chưa đăng nhập → Hiện form, ẩn các nút chức năng
-        authForm.style.display = "block";
+    } else 
+    {
+      authForm.style.display = "block";
         userActions.style.display = "none";
         authMessage.textContent = "";
     }
 });
-
 document.getElementById("logout-btn")?.addEventListener("click", () => {
     auth.signOut().then(() => {
         authMessage.style.color = "blue";
@@ -62,37 +56,6 @@ document.getElementById("logout-btn")?.addEventListener("click", () => {
     });
 });
 
-//                            
-// Firebase Config (Đã cập nhật với config của bạn)
-const firebaseConfig = {
-  apiKey: "AIzaSyA_M3X9VxAOH0jKy799avu09BPA480WHpA",
-  authDomain: "hcmue-a95cd.firebaseapp.com",
-  projectId: "hcmue-a95cd",
-  storageBucket: "hcmue-a95cd.appspot.com",
-  messagingSenderId: "847360348342",
-  appId: "1:847360348342:web:d16d48c63511cd613c1617"
-};
-
-// Khởi tạo Firebase
-try {
-    firebase.initializeApp(firebaseConfig);
-    console.log("Firebase initialized successfully.");
-} catch (error) {
-    console.error("Firebase initialization failed:", error);
-    alert("Lỗi khởi tạo Firebase. Kiểm tra config!");
-}
-const auth = firebase.auth();
-const db = firebase.firestore();  // Thêm Firestore
-
-// Auth Logic for index.html (Login) - Giữ nguyên
-if (document.getElementById('auth-form')) {
-    // ... (giữ nguyên code auth như cũ)
-}
-
-// Signup Logic for signup.html - Giữ nguyên
-if (document.getElementById('signup-form')) {
-    // ... (giữ nguyên code signup như cũ)
-}
 
 // Create Quiz Logic (for create-quiz.html) - Cập nhật để lưu lên Firestore và thêm điểm
 if (document.getElementById('quiz-form')) {
