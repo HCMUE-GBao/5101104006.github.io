@@ -105,23 +105,32 @@ if (document.getElementById('quiz-form')) {
         const questionCard = document.createElement('div');
         questionCard.className = 'question-card';
         questionCard.innerHTML = `
-            <label><i class="fas fa-question"></i> Câu Hỏi: <input type="text" class="question" required></label>
-            <div class="answers">
-                <div class="answer-item">
-                    <input type="text" class="answer" placeholder="Đáp Án 1 ✅" required>
-                    <button type="button" class="remove-answer" style="display: none;"><i class="fas fa-times"></i></button>
-                </div>
-                <div class="answer-item">
-                    <input type="text" class="answer" placeholder="Đáp Án 2 ✅" required>
-                    <button type="button" class="remove-answer" style="display: none;"><i class="fas fa-times"></i></button>
-                </div>
-            </div>
-            <button type="button" class="add-answer btn btn-success"><i class="fas fa-plus"></i> Thêm Đáp Án</button>
-            <select class="correct-answer">
-                <option value="0">Đáp Án Đúng: 1</option>
-                <option value="1">Đáp Án Đúng: 2</option>
-            </select>
-        `;
+    <label><i class="fas fa-question"></i> Câu Hỏi: 
+        <input type="text" class="question" required>
+    </label>
+
+    <label><i class="fas fa-star"></i> Điểm số:
+        <input type="number" class="point" min="1" value="1" required>
+    </label>
+
+    <div class="answers">
+        <div class="answer-item">
+            <input type="text" class="answer" placeholder="Đáp Án 1" required>
+            <button type="button" class="remove-answer" style="display:none;"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="answer-item">
+            <input type="text" class="answer" placeholder="Đáp Án 2" required>
+            <button type="button" class="remove-answer" style="display:none;"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <button type="button" class="add-answer btn btn-success">+ Thêm Đáp Án</button>
+
+    <select class="correct-answer">
+        <option value="0">Đáp Án Đúng: 1</option>
+        <option value="1">Đáp Án Đúng: 2</option>
+    </select>
+`;
         return questionCard;
     }
     // Thêm câu hỏi mới
@@ -196,13 +205,14 @@ if (document.getElementById('quiz-form')) {
             const question = card.querySelector('.question').value.trim();
             const answers = Array.from(card.querySelectorAll('.answer')).map(input => input.value.trim()).filter(val => val);
             const correct = parseInt(card.querySelector('.correct-answer').value);
+            const point = parseInt(card.querySelector('.point').value);
             if (!question || answers.length < 2) {
                 message.textContent = 'Mỗi câu hỏi cần có nội dung và ít nhất 2 đáp án!';
                 message.className = 'error';
                 console.error("Validation failed: Missing question or answers.");
                 return null;
             }
-            return { question, answers, correct };
+            return { question, answers, correct, point};
         }).filter(q => q !== null);
         if (!title || questions.length === 0) {
             message.textContent = 'Vui lòng nhập tiêu đề và ít nhất 1 câu hỏi!';
