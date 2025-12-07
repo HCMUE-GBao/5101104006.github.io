@@ -183,3 +183,15 @@ main {
     }
 }
 
+.selected {
+    background-color: #d0eaff;
+    border: 2px solid #2196f3;
+}
+
+.result-item {
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px #ccc;
+}
