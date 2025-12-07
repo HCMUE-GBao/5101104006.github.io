@@ -448,21 +448,6 @@ document.getElementById('quiz-form').addEventListener('submit', (e) => {
     saveQuizToFirestore(quizData);
 });
 
-// Hàm tạo mã truy cập ngẫu nhiên (abc-xyz-def)
-function generateAccessCode() {
-    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    let code = '';
-    for (let i = 0; i < 3; i++) {
-        let segment = '';
-        for (let j = 0; j < 3; j++) {
-            segment += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-        code += segment;
-        if (i < 2) code += '-'; // Thêm dấu '-'
-    }
-    return code;
-}
-
 // Lưu quiz vào Firestore
 function saveQuizToFirestore(quizData) {
     const quizId = db.collection('quizzes').doc().id;  // Tạo ID ngẫu nhiên cho quiz mới
