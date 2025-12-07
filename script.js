@@ -193,44 +193,7 @@ if (document.getElementById('quiz-form')) {
     }
     // Gắn sự kiện cho question card đầu tiên
     attachAnswerEvents(questionsContainer.querySelector('.question-card'));
-    // Submit form và tải JSON
-    form.addEventListener('submit', e => {
-        e.preventDefault();
-        console.log("Submitting form...");
-        const title = document.getElementById('quiz-title').value.trim();
-        const time = parseInt(document.getElementById('quiz-time').value);
-        const questions = Array.from(document.querySelectorAll('.question-card')).map(card => {
-            const question = card.querySelector('.question').value.trim();
-            const answers = Array.from(card.querySelectorAll('.answer')).map(input => input.value.trim()).filter(val => val);
-            const correct = parseInt(card.querySelector('.correct-answer').value);
-            const point = parseInt(card.querySelector('.point').value);
-            if (!question || answers.length < 2) {
-                message.textContent = 'Mỗi câu hỏi cần có nội dung và ít nhất 2 đáp án!';
-                message.className = 'error';
-                console.error("Validation failed: Missing question or answers.");
-                return null;
-            }
-            return { question, answers, correct, point};
-        }).filter(q => q !== null);
-        if (!title || questions.length === 0) {
-            message.textContent = 'Vui lòng nhập tiêu đề và ít nhất 1 câu hỏi!';
-            message.className = 'error';
-            console.error("Validation failed: Missing title or questions.");
-            return;
-        }
-        const quiz = { title, time, questions };
-        console.log("Quiz data:", quiz);
-        const blob = new Blob([JSON.stringify(quiz, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'quiz.json';
-        a.click();
-        message.textContent = 'Tệp JSON đã được tải thành công! Kiểm tra thư mục Downloads.';
-        message.className = 'success';
-        console.log("JSON downloaded successfully.");
-    });
-}
+    
 // Play Quiz Logic (for play-quiz.html)
 if (document.getElementById('upload-json')) {
     const upload = document.getElementById('upload-json');
@@ -328,45 +291,6 @@ if (document.getElementById('upload-json')) {
 
 // Khai báo một lần, dùng let vì sẽ gán lại khi tải quiz
 let quizId;
-
-// Tạo quiz mới
-quizId = generateQuizId();
-db.collection("quizzes").doc(quizId).set(quiz)
-  .then(() => {
-      message.textContent = `Tạo quiz thành công! ID: ${quizId}`;
-      message.className = 'success';
-
-      // Hiển thị đường liên kết cho giáo viên
-      const link = `${window.location.origin}/play-quiz.html?id=${quizId}`;
-      message.innerHTML += `<br><br>Liên kết truy cập: 
-        <a href="${link}" target="_blank">${link}</a>`;
-  })
-  .catch(err => {
-      message.textContent = "Lỗi khi lưu quiz: " + err.message;
-      message.className = 'error';
-  });
-
-// Generate Link //
-function generateQuizId() {
-    const part = () => Math.random().toString(36).substring(2, 5);
-    return `${part()}-${part()}-${part()}`;
-}
-
-// Tải Quiz bằng ID //
-document.getElementById("load-quiz-btn").addEventListener("click", () => {
-    const id = document.getElementById("quiz-id-input").value.trim();
-
-    db.collection("quizzes").doc(id).get().then(doc => {
-        if (!doc.exists) {
-            alert("Quiz không tồn tại!");
-            return;
-        }
-
-        quiz = doc.data();
-        quizId = id; // gán lại giá trị
-        startQuiz();
-    });
-});
 
 // Khởi tạo biến dùng chung
 let quiz;
