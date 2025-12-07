@@ -410,28 +410,6 @@ function generateAccessCode() {
     }
     return code;
 }
-
-// Lưu quiz vào Firestore
-function saveQuizToFirestore(quizData) {
-    const quizId = db.collection('quizzes').doc().id;  // Tạo ID ngẫu nhiên cho quiz mới
-    const accessCode = generateAccessCode();  // Tạo mã truy cập ngẫu nhiên
-
-    const quizRef = db.collection('quizzes').doc(quizId);
-    quizRef.set({
-        title: quizData.title,
-        time: quizData.time,
-        questions: quizData.questions,
-        accessCode: accessCode,  // Lưu mã truy cập
-    })
-    .then(() => {
-        console.log("Quiz saved to Firestore.");
-        showSuccessMessage(accessCode);  // Hiển thị thông báo thành công
-    })
-    .catch((error) => {
-        console.error("Error saving quiz: ", error);
-        alert("Có lỗi xảy ra khi lưu quiz.");
-    });
-}
   
 // Xử lý khi người dùng bấm "Tạo Quiz"
 document.getElementById('quiz-form').addEventListener('submit', (e) => {
