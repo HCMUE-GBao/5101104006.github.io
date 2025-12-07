@@ -276,8 +276,6 @@ function initPlayQuiz() {
   const timeLeftEl = $('#time-left');
   const resultsEl = $('#results');
 
-  if (!uploadInput) return;
-
   // state
   let quiz = null;
   let currentQuestion = 0;
