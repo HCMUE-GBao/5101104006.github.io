@@ -326,57 +326,47 @@ if (document.getElementById('upload-json')) {
     }
 }
 
-// Hàm tạo ID ngẫu nhiên cho quiz
+// Khai báo một lần, dùng let vì sẽ gán lại khi tải quiz
+let quizId;
+
+// Tạo quiz mới
+quizId = generateQuizId();
+db.collection("quizzes").doc(quizId).set(quiz)
+  .then(() => {
+      message.textContent = `Tạo quiz thành công! ID: ${quizId}`;
+      message.className = 'success';
+
+      // Hiển thị đường liên kết cho giáo viên
+      const link = `${window.location.origin}/play-quiz.html?id=${quizId}`;
+      message.innerHTML += `<br><br>Liên kết truy cập: 
+        <a href="${link}" target="_blank">${link}</a>`;
+  })
+  .catch(err => {
+      message.textContent = "Lỗi khi lưu quiz: " + err.message;
+      message.className = 'error';
+  });
+
+// Generate Link //
 function generateQuizId() {
     const part = () => Math.random().toString(36).substring(2, 5);
     return `${part()}-${part()}-${part()}`;
 }
 
-// Tạo quiz và lưu vào Firestore
-function createQuiz(quizData) {
-    const quizId = generateQuizId(); // Sinh ID cho quiz
+// Tải Quiz bằng ID //
+document.getElementById("load-quiz-btn").addEventListener("click", () => {
+    const id = document.getElementById("quiz-id-input").value.trim();
 
-    db.collection("quizzes").doc(quizId).set(quizData)
-        .then(() => {
-            console.log("Quiz created successfully!");
-            const link = `${window.location.origin}/play-quiz.html?id=${quizId}`; // Tạo link chia sẻ
-            displayLink(link);  // Hiển thị link chia sẻ
-        })
-        .catch((err) => {
-            console.error("Error creating quiz: ", err);
-        });
-}
+    db.collection("quizzes").doc(id).get().then(doc => {
+        if (!doc.exists) {
+            alert("Quiz không tồn tại!");
+            return;
+        }
 
-// Hiển thị link cho người dùng
-function displayLink(link) {
-    const messageContainer = document.getElementById("message");
-    messageContainer.innerHTML = `Quiz đã được tạo thành công! <br> Chia sẻ link này: <a href="${link}" target="_blank">${link}</a>`;
-}
-
-// Khi người dùng click vào nút "Tạo Quiz"
-document.getElementById("create-quiz-btn").addEventListener("click", () => {
-    createQuiz(sampleQuiz); // Tạo quiz với dữ liệu mẫu
+        quiz = doc.data();
+        quizId = id; // gán lại giá trị
+        startQuiz();
+    });
 });
-
-/ Lấy ID từ URL
-const params = new URLSearchParams(window.location.search);
-const quizId = params.get("id");
-
-if (quizId) {
-    db.collection("quizzes").doc(quizId).get()
-        .then(doc => {
-            if (!doc.exists) {
-                alert("Quiz không tồn tại!");
-                return;
-            }
-            const quiz = doc.data();
-            startQuiz(quiz);  // Hàm hiển thị quiz
-        })
-        .catch(err => console.error(err));
-} else {
-    alert("ID quiz không hợp lệ!");
-}
-
 
 // Khởi tạo biến dùng chung
 let quiz;
