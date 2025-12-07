@@ -1,4 +1,3 @@
-// ---------- CONFIG & INIT ----------
 const firebaseConfig = {
   apiKey: "AIzaSyA_M3X9VxAOH0jKy799avu09BPA480WHpA",
   authDomain: "hcmue-a95cd.firebaseapp.com",
@@ -8,6 +7,7 @@ const firebaseConfig = {
   appId: "1:847360348342:web:d16d48c63511cd613c1617",
   measurementId: "G-BRN1DZ4WWX"
 };
+// script.js — Refactor nhẹ bởi Poro (giữ nguyên logic gốc)
 
 try {
   firebase.initializeApp(firebaseConfig);
@@ -214,7 +214,7 @@ function attachCreateQuizHandlers() {
     answers.forEach((_, idx) => {
       const opt = document.createElement('option');
       opt.value = idx;
-      opt.textContent = Đáp Án Đúng: ${idx + 1};
+      opt.textContent = `Đáp Án Đúng: ${idx + 1}`;
       select.appendChild(opt);
     });
   }
@@ -238,9 +238,9 @@ function attachCreateQuizHandlers() {
       const answers = Array.from(c.querySelectorAll('.answer')).map(a => (a.value || '').trim()).filter(x => x !== '');
       const correct = parseInt(c.querySelector('.correct-answer')?.value || '0', 10);
 
-      if (!questionText) { showMsg(quizMessage, Câu ${i+1}: nội dung câu hỏi trống., 'error'); return; }
-      if (answers.length < 2) { showMsg(quizMessage, Câu ${i+1}: phải có ít nhất 2 đáp án., 'error'); return; }
-      if (correct < 0 || correct >= answers.length) { showMsg(quizMessage, Câu ${i+1}: đáp án đúng không hợp lệ., 'error'); return; }
+      if (!questionText) { showMsg(quizMessage, `Câu ${i+1}: nội dung câu hỏi trống.`, 'error'); return; }
+      if (answers.length < 2) { showMsg(quizMessage, `Câu ${i+1}: phải có ít nhất 2 đáp án.`, 'error'); return; }
+      if (correct < 0 || correct >= answers.length) { showMsg(quizMessage, `Câu ${i+1}: đáp án đúng không hợp lệ.`, 'error'); return; }
 
       questions.push({ question: questionText, point: point, answers: answers, correct: correct });
     }
@@ -256,7 +256,7 @@ function attachCreateQuizHandlers() {
         accessCode,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      showMsg(quizMessage, Tạo Quiz thành công! Mã truy cập: ${accessCode}, 'success');
+      showMsg(quizMessage, `Tạo Quiz thành công! Mã truy cập: ${accessCode}`, 'success');
       // Optional: reset form (uncomment if desired)
       // quizForm.reset();
       // questionsContainer.innerHTML = createQuestionCardHTML();
@@ -429,7 +429,7 @@ function initPlayQuiz() {
     timer = setInterval(() => {
       const mm = Math.floor(timeLeftSec / 60);
       const ss = timeLeftSec % 60;
-      timeLeftEl.textContent = ${mm}:${ss.toString().padStart(2,'0')};
+      timeLeftEl.textContent = `${mm}:${ss.toString().padStart(2,'0')}`;
       if (timeLeftSec <= 0) {
         clearInterval(timer);
         showResults();
@@ -485,60 +485,3 @@ document.addEventListener('DOMContentLoaded', () => {
   attachCreateQuizHandlers();
   initPlayQuiz();
 });
-Chị Cún Cute 😍
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chơi Quiz</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <header class="hero-header">
-        <h1><i class="fas fa-gamepad"></i> Chơi Quiz Trắc Nghiệm</h1>
-        <nav>
-            <a href="index.html" class="btn btn-link">
-                <i class="fas fa-home"></i> Trang Chủ
-            </a>
-        </nav>
-    </header>
-    <main class="play-quiz">
-        <div class="upload-card" id="upload-card">
-            <label>
-                Mã Truy Cập Quiz:
-                <input type="text" id="access-code-input" placeholder="Nhập mã: abc-xyz-def">
-            </label>
-            <button id="load-code-btn" class="btn btn-info">
-                <i class="fas fa-play"></i> Truy cập
-            </button>
-            <p id="load-code-msg" style="margin-top: 8px;"></p>
-        </div>
-        <div id="quiz-display" style="display: none;" class="quiz-card">
-            <h2 id="quiz-title"></h2>
-            <div id="timer" class="timer">
-                <i class="fas fa-clock"></i>
-                Thời Gian Còn Lại: <span id="time-left"></span>
-            </div>
-            <div id="question-nav" class="nav-buttons"></div>
-            <div id="question-container" class="question-card">
-                <p id="question-text"></p>
-                <div id="answers"></div>
-            </div>
-            <button id="next-btn" class="btn btn-primary" style="display: none;">
-                <i class="fas fa-arrow-right"></i> Tiếp Theo
-            </button>
-        </div>
-        <!-- KẾT QUẢ -->
-        <div id="results" style="display: none;" class="result-card">
-            <h2><i class="fas fa-trophy"></i> Kết Quả</h2>
-            <p id="score"></p>
-        </div>
-    </main>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="script.js"></script>
-</body>
-</html>
