@@ -327,11 +327,14 @@ if (document.getElementById('upload-json')) {
     }
 }
 
-// Khai báo một lần, dùng let vì sẽ gán lại khi tải quiz
-let quizId;
+// Khai báo biến dùng chung một lần duy nhất
+let quizId;               // ID quiz (sẽ gán khi tạo hoặc tải quiz)
+let quiz;                 // dữ liệu quiz hiện tại
+let currentQuestion = 0;
+let answersChosen = {};   // {0: 2, 1: 0, ...}
 
 // Tạo quiz mới
-quizId = generateQuizId();
+quizId = generateQuizId();  // Gán giá trị quizId khi tạo mới quiz
 db.collection("quizzes").doc(quizId).set(quiz)
   .then(() => {
       message.textContent = `Tạo quiz thành công! ID: ${quizId}`;
@@ -364,16 +367,10 @@ document.getElementById("load-quiz-btn").addEventListener("click", () => {
         }
 
         quiz = doc.data();
-        quizId = id; // gán lại giá trị
+        quizId = id; // gán lại giá trị quizId khi tải quiz
         startQuiz();
     });
 });
-
-// Khởi tạo biến dùng chung
-let quiz;
-let currentQuestion = 0;
-let answersChosen = {}; // {0: 2, 1: 0, ...}
-
 function startQuiz() {
     document.getElementById("upload-card").style.display = "none";
     document.getElementById("quiz-display").style.display = "block";
