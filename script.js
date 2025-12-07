@@ -1,479 +1,429 @@
-
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// ---------- CONFIG & INIT ----------
 const firebaseConfig = {
   apiKey: "AIzaSyA_M3X9VxAOH0jKy799avu09BPA480WHpA",
   authDomain: "hcmue-a95cd.firebaseapp.com",
   projectId: "hcmue-a95cd",
-  storageBucket: "hcmue-a95cd.firebasestorage.app",
+  storageBucket: "hcmue-a95cd.appspot.com", // recommended format
   messagingSenderId: "847360348342",
   appId: "1:847360348342:web:d16d48c63511cd613c1617",
 };
-// Khởi tạo Firebase (Thêm try-catch để tránh lỗi storage)
+
 try {
-    firebase.initializeApp(firebaseConfig);
-    console.log("Firebase initialized successfully.");
-} catch (error) {
-    console.error("Firebase initialization failed:", error);
-    alert("Lỗi khởi tạo Firebase. Kiểm tra config!");
+  firebase.initializeApp(firebaseConfig);
+  console.log("Firebase initialized.");
+} catch (err) {
+  console.error("Firebase init failed:", err);
+  alert("Lỗi khởi tạo Firebase — kiểm tra console.");
 }
+
 const auth = firebase.auth();
 const db = firebase.firestore();
-// Auth Logic for index.html (Login)
-if (document.getElementById('auth-form')) {
-    const form = document.getElementById('auth-form');
-    const loginBtn = document.getElementById('login-btn');
-    const message = document.getElementById('auth-message');
-    const userActions = document.getElementById('user-actions');
-    const logoutBtn = document.getElementById('logout-btn');
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            console.log("User logged in:", user.email);
-            userActions.style.display = 'block';
-            document.querySelector('.auth-card').style.display = 'none';
-        } else {
-            console.log("No user logged in.");
-            userActions.style.display = 'none';
-            document.querySelector('.auth-card').style.display = 'block';
-        }
-    });
-    form.addEventListener('submit', e => {
-        e.preventDefault();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        console.log("Attempting login with:", email);
-        auth.signInWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                console.log("Login successful:", userCredential.user.email);
-                message.textContent = 'Đăng nhập thành công!';
-                message.className = 'success';
-            })
-            .catch(err => {
-                console.error("Login error:", err);
-                let errorMsg = 'Lỗi không xác định.';
-                if (err.code === 'auth/user-not-found') errorMsg = 'Email chưa đăng ký.';
-                else if (err.code === 'auth/wrong-password') errorMsg = 'Mật khẩu sai.';
-                else if (err.code === 'auth/invalid-email') errorMsg = 'Email không hợp lệ.';
-                else errorMsg = err.message;
-                message.textContent = 'Lỗi: ' + errorMsg;
-                message.className = 'error';
-            });
-    });
-    logoutBtn.addEventListener('click', () => {
-        auth.signOut().then(() => console.log("Logged out."));
-    });
+
+// ---------- UTIL ----------
+function $(sel) { return document.querySelector(sel); }
+function $all(sel) { return Array.from(document.querySelectorAll(sel)); }
+function generateAccessCode() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  return Array.from({length:3}, () => Array.from({length:3}, () => chars.charAt(Math.floor(Math.random()*chars.length))).join('')).join('-');
 }
-// Signup Logic for signup.html
-if (document.getElementById('signup-form')) {
-    const form = document.getElementById('signup-form');
-    const message = document.getElementById('signup-message');
-    form.addEventListener('submit', e => {
-        e.preventDefault();
-        const email = document.getElementById('signup-email').value.trim();
-        const password = document.getElementById('signup-password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-        if (password !== confirmPassword) {
-            message.textContent = 'Mật khẩu xác nhận không khớp!';
-            message.className = 'error';
-            return;
-        }
-        console.log("Attempting signup with:", email);
-        auth.createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                console.log("Signup successful:", userCredential.user.email);
-                message.textContent = 'Đăng ký thành công! Chuyển hướng...';
-                message.className = 'success';
-                setTimeout(() => window.location.href = 'index.html', 2000);
-            })
-            .catch(err => {
-                console.error("Signup error:", err);
-                let errorMsg = 'Lỗi không xác định.';
-                if (err.code === 'auth/email-already-in-use') errorMsg = 'Email đã được sử dụng.';
-                else if (err.code === 'auth/weak-password') errorMsg = 'Mật khẩu quá yếu (ít nhất 6 ký tự).';
-                else errorMsg = err.message;
-               message.textContent = 'Lỗi: ' + errorMsg;
-                message.className = 'error';
-            });
-    });
+function showMsg(el, text, cls='') {
+  if (!el) return;
+  el.textContent = text;
+  el.className = cls;
 }
-// Create Quiz Logic (for create-quiz.html)
-if (document.getElementById('quiz-form')) {
-    const form = document.getElementById('quiz-form');
-    const addQuestionBtn = document.getElementById('add-question');
-    const questionsContainer = document.getElementById('questions-container');
-    const message = document.getElementById('quiz-message');
-    // Hàm tạo question card mới với 2 đáp án mặc định
-    function createQuestionCard() {
-        const questionCard = document.createElement('div');
-        questionCard.className = 'question-card';
-        questionCard.innerHTML = `
-    <label><i class="fas fa-question"></i> Câu Hỏi: 
+
+// ---------- AUTH (login/signup/logout) ----------
+function initAuth() {
+  const authForm = $('#auth-form');
+  const loginBtn = $('#login-btn');
+  const authMessage = $('#auth-message');
+  const userActions = $('#user-actions');
+  const logoutBtn = $('#logout-btn');
+
+  if (!authForm) return;
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      userActions && (userActions.style.display = 'block');
+      document.querySelector('.auth-card') && (document.querySelector('.auth-card').style.display = 'none');
+      console.log('User logged in:', user.email);
+    } else {
+      userActions && (userActions.style.display = 'none');
+      document.querySelector('.auth-card') && (document.querySelector('.auth-card').style.display = 'block');
+      console.log('No user logged in.');
+    }
+  });
+
+  authForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const email = (document.getElementById('email')?.value || '').trim();
+    const password = document.getElementById('password')?.value || '';
+
+    if (!email || !password) {
+      showMsg(authMessage, 'Vui lòng nhập email và mật khẩu.', 'error');
+      return;
+    }
+
+    auth.signInWithEmailAndPassword(email, password)
+      .then(uc => showMsg(authMessage, 'Đăng nhập thành công!', 'success'))
+      .catch(err => {
+        console.error('Login error:', err);
+        let msg = 'Lỗi: ' + (err.message || 'Không xác định.');
+        if (err.code === 'auth/user-not-found') msg = 'Email chưa đăng ký.';
+        if (err.code === 'auth/wrong-password') msg = 'Mật khẩu sai.';
+        if (err.code === 'auth/invalid-email') msg = 'Email không hợp lệ.';
+        showMsg(authMessage, msg, 'error');
+      });
+  });
+
+  logoutBtn && logoutBtn.addEventListener('click', () => {
+    auth.signOut().then(() => console.log('Logged out.'));
+  });
+}
+// ---------- SIGNUP ----------
+function initSignup() {
+  const signupForm = $('#signup-form');
+  const signupMessage = $('#signup-message');
+  if (!signupForm) return;
+
+  signupForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const email = (document.getElementById('signup-email')?.value || '').trim();
+    const password = document.getElementById('signup-password')?.value || '';
+    const confirmPassword = document.getElementById('confirm-password')?.value || '';
+
+    if (!email || !password) {
+      showMsg(signupMessage, 'Vui lòng nhập email và mật khẩu.', 'error');
+      return;
+    }
+    if (password !== confirmPassword) {
+      showMsg(signupMessage, 'Mật khẩu xác nhận không khớp!', 'error');
+      return;
+    }
+
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(uc => {
+        showMsg(signupMessage, 'Đăng ký thành công! Chuyển hướng...', 'success');
+        setTimeout(() => window.location.href = 'index.html', 1200);
+      })
+      .catch(err => {
+        console.error('Signup error:', err);
+        let msg = 'Lỗi: ' + (err.message || 'Không xác định.');
+        if (err.code === 'auth/email-already-in-use') msg = 'Email đã được sử dụng.';
+        if (err.code === 'auth/weak-password') msg = 'Mật khẩu quá yếu (ít nhất 6 ký tự).';
+        showMsg(signupMessage, msg, 'error');
+      });
+  });
+}
+
+// ---------- CREATE QUIZ UI HELPERS ----------
+function createQuestionCardHTML() {
+  return `
+    <div class="question-card">
+      <label>Câu Hỏi:
         <input type="text" class="question" required>
-    </label>
-
-    <label><i class="fas fa-star"></i> Điểm số:
+      </label>
+      <label>Điểm:
         <input type="number" class="point" min="1" value="1" required>
-    </label>
-
-    <div class="answers">
+      </label>
+      <div class="answers">
         <div class="answer-item">
-            <input type="text" class="answer" placeholder="Đáp Án 1" required>
-            <button type="button" class="remove-answer" style="display:none;"><i class="fas fa-times"></i></button>
+          <input type="text" class="answer" placeholder="Đáp Án 1" required>
+          <button type="button" class="remove-answer" style="display:none;">×</button>
         </div>
         <div class="answer-item">
-            <input type="text" class="answer" placeholder="Đáp Án 2" required>
-            <button type="button" class="remove-answer" style="display:none;"><i class="fas fa-times"></i></button>
+          <input type="text" class="answer" placeholder="Đáp Án 2" required>
+          <button type="button" class="remove-answer" style="display:none;">×</button>
         </div>
-    </div>
-
-    <button type="button" class="add-answer btn btn-success">+ Thêm Đáp Án</button>
-
-    <select class="correct-answer">
+      </div>
+      <button type="button" class="add-answer btn">+ Thêm Đáp Án</button>
+      <select class="correct-answer">
         <option value="0">Đáp Án Đúng: 1</option>
         <option value="1">Đáp Án Đúng: 2</option>
-    </select>
-`;
-        return questionCard;
-    }
-    // Thêm câu hỏi mới
-    addQuestionBtn.addEventListener('click', () => {
-        console.log("Adding new question...");
-        const newQuestion = createQuestionCard();
-        questionsContainer.appendChild(newQuestion);
-        attachAnswerEvents(newQuestion);  // Gắn sự kiện cho đáp án
-        console.log("Question added successfully.");
-    });
-    // Gắn sự kiện cho đáp án (thêm/xóa)
-    function attachAnswerEvents(questionCard) {
-        const addAnswerBtn = questionCard.querySelector('.add-answer');
-        const answersDiv = questionCard.querySelector('.answers');
-        const correctSelect = questionCard.querySelector('.correct-answer');
-        addAnswerBtn.addEventListener('click', () => {
-            console.log("Adding new answer...");
-            const answerCount = answersDiv.querySelectorAll('.answer-item').length;
-            if (answerCount < 4) {  // Giới hạn tối đa 4 đáp án
-                const newAnswerItem = document.createElement('div');
-                newAnswerItem.className = 'answer-item';
-                newAnswerItem.innerHTML = `
-                    <input type="text" class="answer" placeholder="Đáp Án ${answerCount + 1} ✅" required>
-                    <button type="button" class="remove-answer"><i class="fas fa-times"></i></button>
-                `;
-                answersDiv.appendChild(newAnswerItem);
-                updateCorrectOptions(questionCard);
-                attachRemoveEvent(newAnswerItem.querySelector('.remove-answer'), questionCard);
-                console.log("Answer added successfully.");
-            } else {
-                alert("Tối đa 4 đáp án!");
-            }
-        });
-        // Gắn sự kiện xóa cho các đáp án hiện tại
-        answersDiv.querySelectorAll('.remove-answer').forEach(btn => attachRemoveEvent(btn, questionCard));
-    }
-    function attachRemoveEvent(btn, questionCard) {
-        btn.addEventListener('click', () => {
-            console.log("Removing answer...");
-            const answersDiv = questionCard.querySelector('.answers');
-            const answerItems = answersDiv.querySelectorAll('.answer-item');
-            if (answerItems.length > 2) {  // Giữ ít nhất 2 đáp án
-                btn.parentElement.remove();
-                updateCorrectOptions(questionCard);
-                console.log("Answer removed successfully.");
-            } else {
-                alert("Phải có ít nhất 2 đáp án!");
-            }
-        });
-    }
-    function updateCorrectOptions(questionCard) {
-        const answersDiv = questionCard.querySelector('.answers');
-        const answerCount = answersDiv.querySelectorAll('.answer-item').length;
-        const correctSelect = questionCard.querySelector('.correct-answer');
-        correctSelect.innerHTML = '';
-        for (let i = 0; i < answerCount; i++) {
-            correctSelect.innerHTML += `<option value="${i}">Đáp Án Đúng: ${i + 1}</option>`;
-        }
-    }
-    // Gắn sự kiện cho question card đầu tiên
-    attachAnswerEvents(questionsContainer.querySelector('.question-card'));
-}
-    
-// Play Quiz Logic (for play-quiz.html)
-if (document.getElementById('upload-json')) {
-    const upload = document.getElementById('upload-json');
-    const quizDisplay = document.getElementById('quiz-display');
-    const results = document.getElementById('results');
-    let quiz, currentQuestion = 0, score = 0, timer;
-    upload.addEventListener('change', e => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = () => {
-            quiz = JSON.parse(reader.result);
-            displayQuiz();
-            startTimer();
-        };
-        reader.readAsText(file);
-    });
-    function displayQuiz() {
-    quizDisplay.style.display = 'block';
-    document.getElementById('upload-card').style.display = 'none';  // Thêm dòng này để ẩn khung upload
-    document.getElementById('quiz-title').textContent = quiz.title;
-    updateQuestionNav();
-    showQuestion();
-}
-    function updateQuestionNav() {
-    const nav = document.getElementById('question-nav');
-    nav.innerHTML = '';
-
-    quiz.questions.forEach((_, i) => {
-        const btn = document.createElement('button');
-        btn.textContent = i + 1;
-
-        // Nút active (câu hiện tại)
-        if (i === currentQuestion) {
-            btn.classList.add('active');
-        }
-
-        // Không cho bấm
-        btn.disabled = true;
-
-        nav.appendChild(btn);
-    });
-    }
-    function showQuestion() {
-        const q = quiz.questions[currentQuestion];
-        document.getElementById('question-text').textContent = q.question;
-        const answersDiv = document.getElementById('answers');
-        answersDiv.innerHTML = '';
-        q.answers.forEach((answer, i) => {
-            const btn = document.createElement('button');
-            btn.textContent = answer;
-            btn.addEventListener('click', () => checkAnswer(i));
-            answersDiv.appendChild(btn);
-        });
-        document.getElementById('next-btn').style.display = 'none';
-    }
-    function checkAnswer(selected) {
-        const q = quiz.questions[currentQuestion];
-        const buttons = document.querySelectorAll('#answers button');
-        buttons.forEach((btn, i) => {
-            if (i === q.correct) btn.classList.add('correct');
-           else if (i === selected && i !== q.correct) btn.classList.add('incorrect');
-            else if (i === q.correct) btn.classList.add('correct-answer');
-            btn.disabled = true;
-        });
-        if (selected === q.correct) score++;
-        document.getElementById('next-btn').style.display = 'block';
-    }
-    document.getElementById('next-btn').addEventListener('click', () => {
-        currentQuestion++;
-        if (currentQuestion < quiz.questions.length) {
-            showQuestion();
-            updateQuestionNav();
-        } else {
-            showResults();
-        }
-    });
-    function startTimer() {
-        let timeLeft = quiz.time * 60;
-        timer = setInterval(() => {
-            document.getElementById('time-left').textContent = Math.floor(timeLeft / 60) + ':' + (timeLeft % 60).toString().padStart(2, '0');
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                showResults();
-            }
-            timeLeft--;
-        }, 1000);
-    }
-    function showResults() {
-        clearInterval(timer);
-        quizDisplay.style.display = 'none';
-        results.style.display = 'block';
-        document.getElementById('score').textContent = `Bạn trả lời đúng ${score}/${quiz.questions.length} câu.`;
-    }
+      </select>
+    </div>
+  `;
 }
 
-// Khai báo một lần, dùng let vì sẽ gán lại khi tải quiz
-let quizId;
+function attachCreateQuizHandlers() {
+  const addQBtn = $('#add-question');
+  const questionsContainer = $('#questions-container');
+  const quizForm = $('#quiz-form');
+  const quizMessage = $('#quiz-message');
 
-// Khởi tạo biến dùng chung
-let quiz;
-let currentQuestion = 0;
-let answersChosen = {}; // {0: 2, 1: 0, ...}
+  if (!quizForm) return;
 
-function startQuiz() {
-    document.getElementById("upload-card").style.display = "none";
-    document.getElementById("quiz-display").style.display = "block";
+  // Add initial question card if none
+  if (!questionsContainer.querySelector('.question-card')) {
+    questionsContainer.insertAdjacentHTML('beforeend', createQuestionCardHTML());
+  }
 
-    document.getElementById("quiz-title").textContent = quiz.title;
+  // Delegated listener: add/remove answers and update correct options
+  questionsContainer.addEventListener('click', (e) => {
+const target = e.target;
 
-    startTimer(quiz.time);
-    updateQuestionNav();
-    showQuestion();
-}
-
-function updateQuestionNav() {
-    const nav = document.getElementById("question-nav");
-    nav.innerHTML = "";
-
-    quiz.questions.forEach((_, i) => {
-        const btn = document.createElement("button");
-        btn.textContent = i + 1;
-        btn.className = (i === currentQuestion ? "active" : "");
-
-        btn.addEventListener("click", () => {
-            currentQuestion = i;
-            showQuestion();
-            updateQuestionNav();
-        });
-
-        nav.appendChild(btn);
-    });
-}
-// Không hiển thị đúng sai //
-function showQuestion() {
-    const q = quiz.questions[currentQuestion];
-
-    document.getElementById("question-text").textContent = q.question;
-
-    const ansDiv = document.getElementById("answers");
-    ansDiv.innerHTML = "";
-
-    q.answers.forEach((txt, i) => {
-        const btn = document.createElement("button");
-        btn.textContent = txt;
-
-        // Nếu người dùng đã chọn → đánh dấu
-        if (answersChosen[currentQuestion] === i)
-            btn.classList.add("selected");
-
-        btn.addEventListener("click", () => {
-            answersChosen[currentQuestion] = i;
-            showQuestion();
-        });
-
-        ansDiv.appendChild(btn);
-    });
-
-    document.getElementById("next-btn").style.display = 
-        currentQuestion < quiz.questions.length - 1 ? "block" : "block";
-}
-// Kết quả //
-document.getElementById("next-btn").addEventListener("click", () => {
-    if (currentQuestion < quiz.questions.length - 1) {
-        currentQuestion++;
-        showQuestion();
-        updateQuestionNav();
-    } else {
-        showResults();
+    // Add answer
+    if (target.closest('.add-answer')) {
+      const card = target.closest('.question-card');
+      const answersDiv = card.querySelector('.answers');
+      const count = answersDiv.querySelectorAll('.answer-item').length;
+      if (count >= 4) return alert('Tối đa 4 đáp án!');
+      const newIdx = count + 1;
+      const item = document.createElement('div');
+      item.className = 'answer-item';
+      item.innerHTML = `<input type="text" class="answer" placeholder="Đáp Án ${newIdx}" required>
+                        <button type="button" class="remove-answer">×</button>`;
+      answersDiv.appendChild(item);
+      updateCorrectOptions(card);
+      return;
     }
-});
-//
-function showResults() {
-    clearInterval(timer);
 
-    let total = 0;
-    let gain = 0;
-
-    quiz.questions.forEach((q, i) => {
-        total += q.point;
-        if (answersChosen[i] === q.correct) gain += q.point;
-    });
-
-    document.getElementById("quiz-display").style.display = "none";
-    const r = document.getElementById("results");
-    r.style.display = "block";
-
-    r.innerHTML = `
-        <h2>Kết Quả</h2>
-        <p>Bạn đạt <b>${gain}</b> / ${total} điểm</p>
-        <h3>Chi tiết câu hỏi</h3>
-        ${quiz.questions.map((q, i) => `
-            <div class="result-item">
-                <p><b>Câu ${i+1}:</b> ${q.question}</p>
-                <p>Đáp án của bạn: ${q.answers[answersChosen[i]] ?? "(không chọn)"}</p>
-                <p style="color:${answersChosen[i] === q.correct ? "green" : "red"}">
-                    ${answersChosen[i] === q.correct ? "✓ Đúng" : "✗ Sai"} 
-                </p>
-            </div>
-        `).join("")}
-    `;
-}
-
-// Hàm tạo mã truy cập ngẫu nhiên (abc-xyz-def)
-function generateAccessCode() {
-    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    let code = '';
-    for (let i = 0; i < 3; i++) {
-        let segment = '';
-        for (let j = 0; j < 3; j++) {
-            segment += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-        code += segment;
-        if (i < 2) code += '-'; // Thêm dấu '-'
+    // Remove answer
+    if (target.classList.contains('remove-answer')) {
+      const card = target.closest('.question-card');
+      const answersDiv = card.querySelector('.answers');
+      const items = answersDiv.querySelectorAll('.answer-item');
+      if (items.length <= 2) return alert('Phải có ít nhất 2 đáp án!');
+      target.parentElement.remove();
+      updateCorrectOptions(card);
+      return;
     }
-    return code;
-}
-  
-// Lưu quiz vào Firestore
-function saveQuizToFirestore(quizData) {
-    const quizId = db.collection('quizzes').doc().id;  // Tạo ID ngẫu nhiên cho quiz mới
-    const accessCode = generateAccessCode();  // Tạo mã truy cập ngẫu nhiên
+  });
 
-    const quizRef = db.collection('quizzes').doc(quizId);
-    quizRef.set({
-        title: quizData.title,
-        time: quizData.time,
-        questions: quizData.questions,
-        accessCode: accessCode,  // Lưu mã truy cập
-    })
-    .then(() => {
-        console.log("Quiz saved to Firestore.");
-        showSuccessMessage(accessCode);  // Hiển thị thông báo thành công
-    })
-    .catch((error) => {
-        console.error("Error saving quiz: ", error);
-        alert("Có lỗi xảy ra khi lưu quiz.");
-    });
-}
+  // Add question button
+  addQBtn && addQBtn.addEventListener('click', () => {
+    questionsContainer.insertAdjacentHTML('beforeend', createQuestionCardHTML());
+  });
 
-// Hiển thị thông báo thành công và mã truy cập
-function showSuccessMessage(accessCode) {
-    const messageDiv = document.getElementById('quiz-message');
-    messageDiv.textContent = `Tạo Quiz thành công! Mã của bạn là: ${accessCode}`;
-    messageDiv.className = 'success';  // Thêm lớp để hiển thị thông báo thành công
-}
-
-// Xử lý khi người dùng bấm "Tạo Quiz"
-document.getElementById('quiz-form').addEventListener('submit', (e) => {
+  // Single submit handler (no duplicates)
+  quizForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    saveQuizFromForm();
+  });
 
-    // Lấy thông tin từ form
-    const quizTitle = document.getElementById('quiz-title').value.trim();
-    const quizTime = document.getElementById('quiz-time').value.trim();
+  // helper
+  function updateCorrectOptions(card) {
+    const answers = card.querySelectorAll('.answer-item');
+    const select = card.querySelector('.correct-answer');
+    if (!select) return;
+    select.innerHTML = '';
+    answers.forEach((_, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx;
+      opt.textContent = `Đáp Án Đúng: ${idx + 1}`;
+      select.appendChild(opt);
+    });
+  }
+
+  // Save quiz: validate then save to Firestore
+  async function saveQuizFromForm() {
+    const title = ($('#quiz-title')?.value || '').trim();
+    const timeVal = parseInt($('#quiz-time')?.value || '0', 10);
+    if (!title) { showMsg(quizMessage, 'Vui lòng nhập tiêu đề quiz.', 'error'); return; }
+    if (!timeVal || isNaN(timeVal) || timeVal <= 0) { showMsg(quizMessage, 'Thời gian phải là số dương (phút).', 'error'); return; }
+
+    const qCards = Array.from(questionsContainer.querySelectorAll('.question-card'));
+    if (qCards.length === 0) { showMsg(quizMessage, 'Thêm ít nhất 1 câu hỏi.', 'error'); return; }
+
+    // Build questions array with validation
     const questions = [];
+    for (let i = 0; i < qCards.length; i++) {
+      const c = qCards[i];
+      const questionText = (c.querySelector('.question')?.value || '').trim();
+      const point = parseInt(c.querySelector('.point')?.value || '1', 10);
+      const answers = Array.from(c.querySelectorAll('.answer')).map(a => (a.value || '').trim()).filter(x => x !== '');
+const correct = parseInt(c.querySelector('.correct-answer')?.value || '0', 10);
 
-    // Lấy thông tin câu hỏi và đáp án
-    document.querySelectorAll('.question-card').forEach((card) => {
-        const questionText = card.querySelector('.question').value.trim();
-        const point = parseInt(card.querySelector('.point').value);
-        const answers = [];
-        card.querySelectorAll('.answer').forEach((input) => {
-            answers.push(input.value.trim());
-        });
-        const correctAnswer = parseInt(card.querySelector('.correct-answer').value);
+      if (!questionText) { showMsg(quizMessage, `Câu ${i+1}: nội dung câu hỏi trống.`, 'error'); return; }
+      if (answers.length < 2) { showMsg(quizMessage, `Câu ${i+1}: phải có ít nhất 2 đáp án.`, 'error'); return; }
+      if (correct < 0 || correct >= answers.length) { showMsg(quizMessage, `Câu ${i+1}: đáp án đúng không hợp lệ.`, 'error'); return; }
 
-        questions.push({
-            question: questionText,
-            point: point,
-            answers: answers,
-            correct: correctAnswer
-        });
+      questions.push({ question: questionText, point: point, answers: answers, correct: correct });
+    }
+
+    // Generate id + access code
+    try {
+      const quizId = db.collection('quizzes').doc().id;
+      const accessCode = generateAccessCode();
+      await db.collection('quizzes').doc(quizId).set({
+        title,
+        time: timeVal,
+        questions,
+        accessCode,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showMsg(quizMessage, `Tạo Quiz thành công! Mã truy cập: ${accessCode}`, 'success');
+      // Optional: reset form (uncomment if desired)
+      // quizForm.reset();
+      // questionsContainer.innerHTML = createQuestionCardHTML();
+    } catch (err) {
+      console.error('Save quiz error:', err);
+      alert('Có lỗi khi lưu quiz. Kiểm tra console.');
+    }
+  }
+}
+
+// ---------- PLAY QUIZ (single implementation) ----------
+function initPlayQuiz() {
+  const uploadInput = $('#upload-json');
+  const quizDisplay = $('#quiz-display');
+  const uploadCard = $('#upload-card');
+  const quizTitleEl = $('#quiz-title');
+  const questionTextEl = $('#question-text');
+  const answersEl = $('#answers');
+  const nextBtn = $('#next-btn');
+  const questionNav = $('#question-nav');
+  const timeLeftEl = $('#time-left');
+  const resultsEl = $('#results');
+
+  if (!uploadInput) return;
+
+  // state
+  let quiz = null;
+  let currentQuestion = 0;
+  let answersChosen = {}; // index -> chosen index
+  let timer = null;
+  let timeLeftSec = 0;
+
+  uploadInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        // minimal validation
+        if (!parsed.title || !Array.isArray(parsed.questions) || typeof parsed.time !== 'number') {
+          return alert('JSON không hợp lệ. Cần {title, time(number, phút), questions[]}');
+        }
+        quiz = parsed;
+        startQuiz();
+      } catch (err) {
+        console.error('JSON parse error:', err);
+        alert('Không đọc được file JSON.');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // start
+  function startQuiz() {
+    if (!quiz) return;
+    uploadCard && (uploadCard.style.display = 'none');
+    quizDisplay && (quizDisplay.style.display = 'block');
+    quizTitleEl && (quizTitleEl.textContent = quiz.title);
+    currentQuestion = 0;
+    answersChosen = {};
+    buildNav();
+    showQuestion();
+    startTimer(quiz.time);
+  }
+function buildNav() {
+    questionNav.innerHTML = '';
+    quiz.questions.forEach((_, i) => {
+      const b = document.createElement('button');
+      b.textContent = i + 1;
+      b.className = (i === currentQuestion ? 'active' : '');
+      b.addEventListener('click', () => {
+        currentQuestion = i;
+        showQuestion();
+        updateNav();
+      });
+      questionNav.appendChild(b);
+    });
+  }
+
+  function updateNav() {
+    Array.from(questionNav.children).forEach((b, i) => {
+      b.className = (i === currentQuestion ? 'active' : '');
+    });
+  }
+
+  function showQuestion() {
+    const q = quiz.questions[currentQuestion];
+    questionTextEl.textContent = q.question;
+    answersEl.innerHTML = '';
+    q.answers.forEach((txt, i) => {
+      const btn = document.createElement('button');
+      btn.textContent = txt;
+      btn.disabled = false;
+      if (answersChosen[currentQuestion] === i) btn.classList.add('selected');
+      btn.addEventListener('click', () => {
+        answersChosen[currentQuestion] = i;
+        showQuestion(); // re-render to show selection
+      });
+      answersEl.appendChild(btn);
+    });
+    nextBtn.style.display = 'block';
+    updateNav();
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if (currentQuestion < quiz.questions.length - 1) {
+      currentQuestion++;
+      showQuestion();
+    } else {
+      showResults();
+    }
+  });
+
+  function startTimer(minutes) {
+    clearInterval(timer);
+    timeLeftSec = Math.max(0, Math.floor(minutes) * 60);
+    timer = setInterval(() => {
+      const mm = Math.floor(timeLeftSec / 60);
+      const ss = timeLeftSec % 60;
+      timeLeftEl.textContent = `${mm}:${ss.toString().padStart(2,'0')}`;
+      if (timeLeftSec <= 0) {
+        clearInterval(timer);
+        showResults();
+      }
+      timeLeftSec--;
+    }, 1000);
+  }
+
+  function showResults() {
+    clearInterval(timer);
+    quizDisplay.style.display = 'none';
+    resultsEl.style.display = 'block';
+
+    let total = 0, gain = 0;
+    const details = quiz.questions.map((q, i) => {
+      total += q.point;
+      const chosenIdx = answersChosen[i];
+      const chosenText = chosenIdx == null ? '(không chọn)' : q.answers[chosenIdx];
+      const isCorrect = chosenIdx === q.correct;
+      if (isCorrect) gain += q.point;
+      return {
+        idx: i+1,
+        q: q.question,
+        chosen: chosenText,
+        correct: q.answers[q.correct],
+        isCorrect,
+        point: q.point
+      };
     });
 
-    const quizData = {
-        title: quizTitle,
-        time: parseInt(quizTime),
-        questions: questions
-    };
+    // render
+    resultsEl.innerHTML = `
+      <h2>Kết Quả</h2>
+      <p>Bạn đạt <b>${gain}</b> / ${total} điểm</p>
+      <h3>Chi tiết</h3>
+      ${details.map(d => `
+        <div class="result-item">
+          <p><b>Câu ${d.idx}:</b> ${d.q}</p>
+          <p>Đáp án của bạn: ${d.chosen}</p>
+          <p style="color:${d.isCorrect ? 'green' : 'red'}">${d.isCorrect ? '✓ Đúng' : '✗ Sai'} — (Đúng: ${d.correct})</p>
+        </div>
+      `).join('')}
+    `;
+  }
+}
 
-      // Lưu quiz vào Firestore và tạo mã truy cập
-    saveQuizToFirestore(quizData);
+// ---------- BOOTSTRAP ----------
+document.addEventListener('DOMContentLoaded', () => {
+  initAuth();
+  initSignup();
+  attachCreateQuizHandlers();
+  initPlayQuiz();
 });
