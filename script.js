@@ -196,42 +196,47 @@ if (document.getElementById('quiz-form')) {
     attachAnswerEvents(questionsContainer.querySelector('.question-card'));
     // Submit form và tải JSON
     form.addEventListener('submit', e => {
-        e.preventDefault();
-        console.log("Submitting form...");
-        const title = document.getElementById('quiz-title').value.trim();
-        const time = parseInt(document.getElementById('quiz-time').value);
-        const questions = Array.from(document.querySelectorAll('.question-card')).map(card => {
-            const question = card.querySelector('.question').value.trim();
-            const answers = Array.from(card.querySelectorAll('.answer')).map(input => input.value.trim()).filter(val => val);
-            const correct = parseInt(card.querySelector('.correct-answer').value);
-            const point = parseInt(card.querySelector('.point').value);
-            if (!question || answers.length < 2) {
-                message.textContent = 'Mỗi câu hỏi cần có nội dung và ít nhất 2 đáp án!';
-                message.className = 'error';
-                console.error("Validation failed: Missing question or answers.");
-                return null;
-            }
-            return { question, answers, correct, point};
-        }).filter(q => q !== null);
-        if (!title || questions.length === 0) {
-            message.textContent = 'Vui lòng nhập tiêu đề và ít nhất 1 câu hỏi!';
+    e.preventDefault();
+    console.log("Submitting form...");
+    const title = document.getElementById('quiz-title').value.trim();
+    const time = parseInt(document.getElementById('quiz-time').value);
+    const questions = Array.from(document.querySelectorAll('.question-card')).map(card => {
+        const question = card.querySelector('.question').value.trim();
+        const answers = Array.from(card.querySelectorAll('.answer')).map(input => input.value.trim()).filter(val => val);
+        const correct = parseInt(card.querySelector('.correct-answer').value);
+        const point = parseInt(card.querySelector('.point').value);
+        if (!question || answers.length < 2) {
+            message.textContent = 'Mỗi câu hỏi cần có nội dung và ít nhất 2 đáp án!';
             message.className = 'error';
-            console.error("Validation failed: Missing title or questions.");
-            return;
+            console.error("Validation failed: Missing question or answers.");
+            return null;
         }
-        const quiz = { title, time, questions };
-        console.log("Quiz data:", quiz);
-        const blob = new Blob([JSON.stringify(quiz, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'quiz.json';
-        a.click();
-        message.textContent = 'Tệp JSON đã được tải thành công! Kiểm tra thư mục Downloads.';
-        message.className = 'success';
-        console.log("JSON downloaded successfully.");
-    });
-}
+        return { question, answers, correct, point};
+    }).filter(q => q !== null);
+    if (!title || questions.length === 0) {
+        message.textContent = 'Vui lòng nhập tiêu đề và ít nhất 1 câu hỏi!';
+        message.className = 'error';
+        console.error("Validation failed: Missing title or questions.");
+        return;
+    }
+    quiz = { title, time, questions };  // lưu quiz vào biến chung
+    console.log("Quiz data:", quiz);
+
+    // Tạo tệp JSON
+    const blob = new Blob([JSON.stringify(quiz, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'quiz.json';
+    a.click();
+
+    // Tạo mã ngẫu nhiên dạng abc-xyz-fgh
+    const quizCode = generateQuizId(); 
+
+    message.textContent = `Đã tạo Quiz thành công! Mã được cung cấp là: ${quizCode}`;
+    message.className = 'success';
+    console.log("Quiz downloaded successfully. Quiz code:", quizCode);
+});
 // Play Quiz Logic (for play-quiz.html)
 if (document.getElementById('upload-json')) {
     const upload = document.getElementById('upload-json');
