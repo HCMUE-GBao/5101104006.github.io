@@ -1,6 +1,4 @@
-
-
-// Firebase Config (Đã cập nhật với config của bạn)
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyA_M3X9VxAOH0jKy799avu09BPA480WHpA",
   authDomain: "hcmue-a95cd.firebaseapp.com",
@@ -9,7 +7,6 @@ const firebaseConfig = {
   messagingSenderId: "847360348342",
   appId: "1:847360348342:web:d16d48c63511cd613c1617",
 };
-
 // Khởi tạo Firebase (Thêm try-catch để tránh lỗi storage)
 try {
     firebase.initializeApp(firebaseConfig);
