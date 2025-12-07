@@ -328,7 +328,6 @@ if (document.getElementById('upload-json')) {
 }
 
 // Lưu Quiz //
-const db = firebase.firestore();
 const quizId = generateQuizId();
 db.collection("quizzes").doc(quizId).set(quiz)
   .then(() => {
@@ -350,8 +349,6 @@ function generateQuizId() {
     return `${part()}-${part()}-${part()}`;
 }
 // Tải Quiz bằng ID //
-const db = firebase.firestore();
-
 document.getElementById("load-quiz-btn").addEventListener("click", () => {
     const id = document.getElementById("quiz-id-input").value.trim();
 
