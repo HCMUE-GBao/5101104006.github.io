@@ -181,6 +181,9 @@ if (document.getElementById('quiz-form')) {
             correctSelect.innerHTML += `<option value="${i}">Đáp Án Đúng: ${i + 1}</option>`;
         }
     }
+    // Thêm điểm //
+  const point = parseInt(card.querySelector('.point').value);
+   return { question, answers, correct, point };
     // Gắn sự kiện cho question card đầu tiên
     attachAnswerEvents(questionsContainer.querySelector('.question-card'));
     // Submit form và tải JSON
@@ -314,3 +317,148 @@ if (document.getElementById('upload-json')) {
         document.getElementById('score').textContent = `Bạn trả lời đúng ${score}/${quiz.questions.length} câu.`;
     }
 }
+
+// Lưu Quiz //
+const db = firebase.firestore();
+const quizId = generateQuizId();
+db.collection("quizzes").doc(quizId).set(quiz)
+  .then(() => {
+      message.textContent = `Tạo quiz thành công! ID: ${quizId}`;
+      message.className = 'success';
+
+      // Hiển thị đường liên kết cho giáo viên
+      const link = `${window.location.origin}/play-quiz.html?id=${quizId}`;
+      message.innerHTML += `<br><br>Liên kết truy cập: 
+        <a href="${link}" target="_blank">${link}</a>`;
+  })
+  .catch(err => {
+      message.textContent = "Lỗi khi lưu quiz: " + err.message;
+      message.className = 'error';
+  });
+// Generate Link //
+function generateQuizId() {
+    const part = () => Math.random().toString(36).substring(2, 5);
+    return `${part()}-${part()}-${part()}`;
+}
+// Tải Quiz bằng ID //
+const db = firebase.firestore();
+
+document.getElementById("load-quiz-btn").addEventListener("click", () => {
+    const id = document.getElementById("quiz-id-input").value.trim();
+
+    db.collection("quizzes").doc(id).get().then(doc => {
+        if (!doc.exists) {
+            alert("Quiz không tồn tại!");
+            return;
+        }
+
+        quiz = doc.data();
+        quizId = id;
+        startQuiz();
+    });
+});
+// Chọn câu bất kỳ //
+let quiz, quizId;
+let currentQuestion = 0;
+let answersChosen = {}; // {0: 2, 1: 0, ...}
+
+function startQuiz() {
+    document.getElementById("upload-card").style.display = "none";
+    document.getElementById("quiz-display").style.display = "block";
+
+    document.getElementById("quiz-title").textContent = quiz.title;
+
+    startTimer(quiz.time);
+    updateQuestionNav();
+    showQuestion();
+}
+
+function updateQuestionNav() {
+    const nav = document.getElementById("question-nav");
+    nav.innerHTML = "";
+
+    quiz.questions.forEach((_, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = i + 1;
+        btn.className = (i === currentQuestion ? "active" : "");
+
+        btn.addEventListener("click", () => {
+            currentQuestion = i;
+            showQuestion();
+            updateQuestionNav();
+        });
+
+        nav.appendChild(btn);
+    });
+}
+// Không hiển thị đúng sai //
+function showQuestion() {
+    const q = quiz.questions[currentQuestion];
+
+    document.getElementById("question-text").textContent = q.question;
+
+    const ansDiv = document.getElementById("answers");
+    ansDiv.innerHTML = "";
+
+    q.answers.forEach((txt, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = txt;
+
+        // Nếu người dùng đã chọn → đánh dấu
+        if (answersChosen[currentQuestion] === i)
+            btn.classList.add("selected");
+
+        btn.addEventListener("click", () => {
+            answersChosen[currentQuestion] = i;
+            showQuestion();
+        });
+
+        ansDiv.appendChild(btn);
+    });
+
+    document.getElementById("next-btn").style.display = 
+        currentQuestion < quiz.questions.length - 1 ? "block" : "block";
+}
+// Kết quả //
+document.getElementById("next-btn").addEventListener("click", () => {
+    if (currentQuestion < quiz.questions.length - 1) {
+        currentQuestion++;
+        showQuestion();
+        updateQuestionNav();
+    } else {
+        showResults();
+    }
+});
+//
+function showResults() {
+    clearInterval(timer);
+
+    let total = 0;
+    let gain = 0;
+
+    quiz.questions.forEach((q, i) => {
+        total += q.point;
+        if (answersChosen[i] === q.correct) gain += q.point;
+    });
+
+    document.getElementById("quiz-display").style.display = "none";
+    const r = document.getElementById("results");
+    r.style.display = "block";
+
+    r.innerHTML = `
+        <h2>Kết Quả</h2>
+        <p>Bạn đạt <b>${gain}</b> / ${total} điểm</p>
+        <h3>Chi tiết câu hỏi</h3>
+        ${quiz.questions.map((q, i) => `
+            <div class="result-item">
+                <p><b>Câu ${i+1}:</b> ${q.question}</p>
+                <p>Đáp án của bạn: ${q.answers[answersChosen[i]] ?? "(không chọn)"}</p>
+                <p style="color:${answersChosen[i] === q.correct ? "green" : "red"}">
+                    ${answersChosen[i] === q.correct ? "✓ Đúng" : "✗ Sai"} 
+                </p>
+            </div>
+        `).join("")}
+    `;
+}
+
+
