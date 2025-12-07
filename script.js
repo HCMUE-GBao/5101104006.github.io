@@ -1,3 +1,68 @@
+
+var firebaseConfig = {
+  apiKey: "AIzaSyA_M3X9VxAOH0jKy799avu09BPA480WHpA",
+  authDomain: "hcmue-a95cd.firebaseapp.com",
+  projectId: "hcmue-a95cd",
+  storageBucket: "hcmue-a95cd.appspot.com",
+  messagingSenderId: "847360348342",
+  appId: "1:847360348342:web:d16d48c63511cd613c1617"
+};
+
+// Khởi tạo Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// ============================
+// 2. Xử lý đăng nhập
+// ============================
+const authForm = document.getElementById("auth-form");
+const authMessage = document.getElementById("auth-message");
+const userActions = document.getElementById("user-actions");
+
+authForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            authMessage.style.color = "green";
+            authMessage.textContent = "🎉 Đăng nhập thành công!";
+        })
+        .catch((error) => {
+            authMessage.style.color = "red";
+            authMessage.textContent = "❌ " + error.message;
+        });
+});
+
+
+// ============================
+// 3. Theo dõi trạng thái đăng nhập (auto)
+// ============================
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        // Đã đăng nhập → Ẩn form, hiện các nút chức năng
+        authForm.style.display = "none";
+        userActions.style.display = "flex";
+        authMessage.textContent = `👋 Xin chào, ${user.email}`;
+        authMessage.style.color = "green";
+    } else {
+        // Chưa đăng nhập → Hiện form, ẩn các nút chức năng
+        authForm.style.display = "block";
+        userActions.style.display = "none";
+        authMessage.textContent = "";
+    }
+});
+
+document.getElementById("logout-btn")?.addEventListener("click", () => {
+    auth.signOut().then(() => {
+        authMessage.style.color = "blue";
+        authMessage.textContent = "Bạn đã đăng xuất!";
+    });
+});
+
+//                            
 // Firebase Config (Đã cập nhật với config của bạn)
 const firebaseConfig = {
   apiKey: "AIzaSyA_M3X9VxAOH0jKy799avu09BPA480WHpA",
