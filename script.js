@@ -7,6 +7,7 @@ const firebaseConfig = {
   messagingSenderId: "847360348342",
   appId: "1:847360348342:web:d16d48c63511cd613c1617",
 };
+// script.js — Refactor nhẹ bởi Poro (giữ nguyên logic gốc)
 
 try {
   firebase.initializeApp(firebaseConfig);
@@ -80,6 +81,7 @@ function initAuth() {
     auth.signOut().then(() => console.log('Logged out.'));
   });
 }
+
 // ---------- SIGNUP ----------
 function initSignup() {
   const signupForm = $('#signup-form');
@@ -154,41 +156,43 @@ function attachCreateQuizHandlers() {
   if (!quizForm) return;
 
   // Add initial question card if none
-  if (!questionsContainer.querySelector('.question-card')) {
+  if (questionsContainer && !questionsContainer.querySelector('.question-card')) {
     questionsContainer.insertAdjacentHTML('beforeend', createQuestionCardHTML());
   }
 
   // Delegated listener: add/remove answers and update correct options
-  questionsContainer.addEventListener('click', (e) => {
-const target = e.target;
+  if (questionsContainer) {
+    questionsContainer.addEventListener('click', (e) => {
+      const target = e.target;
 
-    // Add answer
-    if (target.closest('.add-answer')) {
-      const card = target.closest('.question-card');
-      const answersDiv = card.querySelector('.answers');
-      const count = answersDiv.querySelectorAll('.answer-item').length;
-      if (count >= 4) return alert('Tối đa 4 đáp án!');
-      const newIdx = count + 1;
-      const item = document.createElement('div');
-      item.className = 'answer-item';
-      item.innerHTML = `<input type="text" class="answer" placeholder="Đáp Án ${newIdx}" required>
-                        <button type="button" class="remove-answer">×</button>`;
-      answersDiv.appendChild(item);
-      updateCorrectOptions(card);
-      return;
-    }
+      // Add answer
+      if (target.closest('.add-answer')) {
+        const card = target.closest('.question-card');
+        const answersDiv = card.querySelector('.answers');
+        const count = answersDiv.querySelectorAll('.answer-item').length;
+        if (count >= 4) return alert('Tối đa 4 đáp án!');
+        const newIdx = count + 1;
+        const item = document.createElement('div');
+        item.className = 'answer-item';
+        item.innerHTML = `<input type="text" class="answer" placeholder="Đáp Án ${newIdx}" required>
+                          <button type="button" class="remove-answer">×</button>`;
+        answersDiv.appendChild(item);
+        updateCorrectOptions(card);
+        return;
+      }
 
-    // Remove answer
-    if (target.classList.contains('remove-answer')) {
-      const card = target.closest('.question-card');
-      const answersDiv = card.querySelector('.answers');
-      const items = answersDiv.querySelectorAll('.answer-item');
-      if (items.length <= 2) return alert('Phải có ít nhất 2 đáp án!');
-      target.parentElement.remove();
-      updateCorrectOptions(card);
-      return;
-    }
-  });
+      // Remove answer
+      if (target.classList.contains('remove-answer')) {
+        const card = target.closest('.question-card');
+        const answersDiv = card.querySelector('.answers');
+        const items = answersDiv.querySelectorAll('.answer-item');
+        if (items.length <= 2) return alert('Phải có ít nhất 2 đáp án!');
+        target.parentElement.remove();
+        updateCorrectOptions(card);
+        return;
+      }
+    });
+  }
 
   // Add question button
   addQBtn && addQBtn.addEventListener('click', () => {
@@ -210,7 +214,7 @@ const target = e.target;
     answers.forEach((_, idx) => {
       const opt = document.createElement('option');
       opt.value = idx;
-      opt.textContent = `Đáp Án Đúng: ${idx + 1}`;
+      opt.textContent = Đáp Án Đúng: ${idx + 1};
       select.appendChild(opt);
     });
   }
@@ -232,11 +236,11 @@ const target = e.target;
       const questionText = (c.querySelector('.question')?.value || '').trim();
       const point = parseInt(c.querySelector('.point')?.value || '1', 10);
       const answers = Array.from(c.querySelectorAll('.answer')).map(a => (a.value || '').trim()).filter(x => x !== '');
-const correct = parseInt(c.querySelector('.correct-answer')?.value || '0', 10);
+      const correct = parseInt(c.querySelector('.correct-answer')?.value || '0', 10);
 
-      if (!questionText) { showMsg(quizMessage, `Câu ${i+1}: nội dung câu hỏi trống.`, 'error'); return; }
-      if (answers.length < 2) { showMsg(quizMessage, `Câu ${i+1}: phải có ít nhất 2 đáp án.`, 'error'); return; }
-      if (correct < 0 || correct >= answers.length) { showMsg(quizMessage, `Câu ${i+1}: đáp án đúng không hợp lệ.`, 'error'); return; }
+      if (!questionText) { showMsg(quizMessage, Câu ${i+1}: nội dung câu hỏi trống., 'error'); return; }
+      if (answers.length < 2) { showMsg(quizMessage, Câu ${i+1}: phải có ít nhất 2 đáp án., 'error'); return; }
+      if (correct < 0 || correct >= answers.length) { showMsg(quizMessage, Câu ${i+1}: đáp án đúng không hợp lệ., 'error'); return; }
 
       questions.push({ question: questionText, point: point, answers: answers, correct: correct });
     }
@@ -252,7 +256,7 @@ const correct = parseInt(c.querySelector('.correct-answer')?.value || '0', 10);
         accessCode,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      showMsg(quizMessage, `Tạo Quiz thành công! Mã truy cập: ${accessCode}`, 'success');
+      showMsg(quizMessage, Tạo Quiz thành công! Mã truy cập: ${accessCode}, 'success');
       // Optional: reset form (uncomment if desired)
       // quizForm.reset();
       // questionsContainer.innerHTML = createQuestionCardHTML();
@@ -265,7 +269,7 @@ const correct = parseInt(c.querySelector('.correct-answer')?.value || '0', 10);
 
 // ---------- PLAY QUIZ (single implementation) ----------
 function initPlayQuiz() {
-  const uploadInput = $('#upload-json');
+  const uploadInput = $('#upload-json'); // optional: may not exist on play page
   const quizDisplay = $('#quiz-display');
   const uploadCard = $('#upload-card');
   const quizTitleEl = $('#quiz-title');
@@ -283,82 +287,88 @@ function initPlayQuiz() {
   let timer = null;
   let timeLeftSec = 0;
 
-  uploadInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(reader.result);
-        // minimal validation
-        if (!parsed.title || !Array.isArray(parsed.questions) || typeof parsed.time !== 'number') {
-          return alert('JSON không hợp lệ. Cần {title, time(number, phút), questions[]}');
+  // ---------------- JSON UPLOAD (optional) ----------------
+  if (uploadInput) {
+    uploadInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          // minimal validation
+          if (!parsed.title || !Array.isArray(parsed.questions) || typeof parsed.time !== 'number') {
+            return alert('JSON không hợp lệ. Cần {title, time(number, phút), questions[]}');
+          }
+          quiz = parsed;
+          startQuiz();
+        } catch (err) {
+          console.error('JSON parse error:', err);
+          alert('Không đọc được file JSON.');
         }
-        quiz = parsed;
+      };
+      reader.readAsText(file);
+    });
+  }
+
+  // ---------- LOAD QUIZ BY ACCESS CODE ----------
+  const accessInput = $('#access-code-input');
+  const loadCodeBtn = $('#load-code-btn');
+  const loadCodeMsg = $('#load-code-msg');
+
+  if (loadCodeBtn) {
+    loadCodeBtn.addEventListener('click', async () => {
+      const code = (accessInput?.value || '').trim().toLowerCase();
+      if (!code) {
+        showMsg(loadCodeMsg, 'Vui lòng nhập mã truy cập.', 'error');
+        return;
+      }
+
+      try {
+        showMsg(loadCodeMsg, 'Đang tải...', '');
+
+        const snap = await db.collection('quizzes')
+          .where('accessCode', '==', code)
+          .limit(1)
+          .get();
+
+        if (snap.empty) {
+          showMsg(loadCodeMsg, 'Không tìm thấy quiz với mã này.', 'error');
+          return;
+        }
+
+        quiz = snap.docs[0].data();
+
+        if (!quiz || !quiz.title || !Array.isArray(quiz.questions) || typeof quiz.time !== 'number') {
+          showMsg(loadCodeMsg, 'Quiz bị lỗi dữ liệu.', 'error');
+          return;
+        }
+
+        showMsg(loadCodeMsg, 'Tải thành công! Bắt đầu...', 'success');
+
         startQuiz();
       } catch (err) {
-        console.error('JSON parse error:', err);
-        alert('Không đọc được file JSON.');
+        console.error('Load code error:', err);
+        showMsg(loadCodeMsg, 'Lỗi khi tải quiz. Kiểm tra console.', 'error');
       }
-    };
-    reader.readAsText(file);
-  });
-  // ---------- LOAD QUIZ BY ACCESS CODE ----------
-const accessInput = $('#access-code-input');
-const loadCodeBtn = $('#load-code-btn');
-const loadCodeMsg = $('#load-code-msg');
-
-if (loadCodeBtn) {
-  loadCodeBtn.addEventListener('click', async () => {
-    const code = (accessInput?.value || '').trim().toLowerCase();
-    if (!code) {
-      showMsg(loadCodeMsg, 'Vui lòng nhập mã truy cập.', 'error');
-      return;
-    }
-
-    try {
-      showMsg(loadCodeMsg, 'Đang tải...', '');
-
-      const snap = await db.collection('quizzes')
-        .where('accessCode', '==', code)
-        .limit(1)
-        .get();
-
-      if (snap.empty) {
-        showMsg(loadCodeMsg, 'Không tìm thấy quiz với mã này.', 'error');
-        return;
-      }
-
-      quiz = snap.docs[0].data();
-
-      if (!quiz || !quiz.title || !Array.isArray(quiz.questions) || typeof quiz.time !== 'number') {
-        showMsg(loadCodeMsg, 'Quiz bị lỗi dữ liệu.', 'error');
-        return;
-      }
-
-      showMsg(loadCodeMsg, 'Tải thành công! Bắt đầu...', 'success');
-
-      startQuiz();
-    } catch (err) {
-      console.error('Load code error:', err);
-      showMsg(loadCodeMsg, 'Lỗi khi tải quiz. Kiểm tra console.', 'error');
-    }
-  });
-}
+    });
+  }
 
   // start
   function startQuiz() {
     if (!quiz) return;
     uploadCard && (uploadCard.style.display = 'none');
     quizDisplay && (quizDisplay.style.display = 'block');
-    quizTitleEl && (quizTitleEl.textContent = quiz.title);
+    if (quizTitleEl) quizTitleEl.textContent = quiz.title;
     currentQuestion = 0;
     answersChosen = {};
     buildNav();
     showQuestion();
     startTimer(quiz.time);
   }
-function buildNav() {
+
+  function buildNav() {
+    if (!questionNav) return;
     questionNav.innerHTML = '';
     quiz.questions.forEach((_, i) => {
       const b = document.createElement('button');
@@ -374,12 +384,14 @@ function buildNav() {
   }
 
   function updateNav() {
+    if (!questionNav) return;
     Array.from(questionNav.children).forEach((b, i) => {
       b.className = (i === currentQuestion ? 'active' : '');
     });
   }
 
   function showQuestion() {
+    if (!questionTextEl || !answersEl) return;
     const q = quiz.questions[currentQuestion];
     questionTextEl.textContent = q.question;
     answersEl.innerHTML = '';
@@ -394,26 +406,30 @@ function buildNav() {
       });
       answersEl.appendChild(btn);
     });
-    nextBtn.style.display = 'block';
+    if (nextBtn) nextBtn.style.display = 'block';
     updateNav();
   }
 
-  nextBtn.addEventListener('click', () => {
-    if (currentQuestion < quiz.questions.length - 1) {
-      currentQuestion++;
-      showQuestion();
-    } else {
-      showResults();
-    }
-  });
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      if (!quiz) return;
+      if (currentQuestion < quiz.questions.length - 1) {
+        currentQuestion++;
+        showQuestion();
+      } else {
+        showResults();
+      }
+    });
+  }
 
   function startTimer(minutes) {
+    if (!timeLeftEl) return;
     clearInterval(timer);
     timeLeftSec = Math.max(0, Math.floor(minutes) * 60);
     timer = setInterval(() => {
       const mm = Math.floor(timeLeftSec / 60);
       const ss = timeLeftSec % 60;
-      timeLeftEl.textContent = `${mm}:${ss.toString().padStart(2,'0')}`;
+      timeLeftEl.textContent = ${mm}:${ss.toString().padStart(2,'0')};
       if (timeLeftSec <= 0) {
         clearInterval(timer);
         showResults();
@@ -424,27 +440,27 @@ function buildNav() {
 
   function showResults() {
     clearInterval(timer);
-    quizDisplay.style.display = 'none';
-    resultsEl.style.display = 'block';
+    quizDisplay && (quizDisplay.style.display = 'none');
+    resultsEl && (resultsEl.style.display = 'block');
 
     let total = 0, gain = 0;
     const details = quiz.questions.map((q, i) => {
-      total += q.point;
+      total += q.point || 0;
       const chosenIdx = answersChosen[i];
-      const chosenText = chosenIdx == null ? '(không chọn)' : q.answers[chosenIdx];
+      const chosenText = (chosenIdx == null) ? '(không chọn)' : q.answers[chosenIdx];
       const isCorrect = chosenIdx === q.correct;
-      if (isCorrect) gain += q.point;
+      if (isCorrect) gain += q.point || 0;
       return {
         idx: i+1,
         q: q.question,
         chosen: chosenText,
         correct: q.answers[q.correct],
         isCorrect,
-        point: q.point
+        point: q.point || 0
       };
     });
 
-    // render
+    if (!resultsEl) return;
     resultsEl.innerHTML = `
       <h2>Kết Quả</h2>
       <p>Bạn đạt <b>${gain}</b> / ${total} điểm</p>
@@ -453,7 +469,9 @@ function buildNav() {
         <div class="result-item">
           <p><b>Câu ${d.idx}:</b> ${d.q}</p>
           <p>Đáp án của bạn: ${d.chosen}</p>
-          <p style="color:${d.isCorrect ? 'green' : 'red'}">${d.isCorrect ? '✓ Đúng' : '✗ Sai'} — (Đúng: ${d.correct})</p>
+          <p style="color:${d.isCorrect ? 'green' : 'red'}">
+            ${d.isCorrect ? '✓ Đúng' : '✗ Sai'} — (Đúng: ${d.correct})
+          </p>
         </div>
       `).join('')}
     `;
