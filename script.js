@@ -190,9 +190,6 @@ if (document.getElementById('quiz-form')) {
             correctSelect.innerHTML += `<option value="${i}">Đáp Án Đúng: ${i + 1}</option>`;
         }
     }
-    // Thêm điểm //
-  const point = parseInt(card.querySelector('.point').value);
-   return { question, answers, correct, point };
     // Gắn sự kiện cho question card đầu tiên
     attachAnswerEvents(questionsContainer.querySelector('.question-card'));
     // Submit form và tải JSON
