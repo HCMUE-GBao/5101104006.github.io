@@ -42,13 +42,17 @@ auth.onAuthStateChanged((user) => {
         userActions.style.display = "flex";
         authMessage.textContent = `👋 Xin chào, ${user.email}`;
         authMessage.style.color = "green";
-    } else 
-    {
-      authForm.style.display = "block";
+
+        loginTitle.style.display = "none";   // ẨN DÒNG ĐĂNG NHẬP
+    } else {
+        authForm.style.display = "block";
         userActions.style.display = "none";
         authMessage.textContent = "";
+
+        loginTitle.style.display = "block";  // HIỆN LẠI NẾU CHƯA LOGIN
     }
 });
+const loginTitle = document.getElementById("login-title");
 document.getElementById("logout-btn")?.addEventListener("click", () => {
     auth.signOut().then(() => {
         authMessage.style.color = "blue";
