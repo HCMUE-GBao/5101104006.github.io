@@ -56,7 +56,7 @@ document.getElementById("logout-btn")?.addEventListener("click", () => {
     });
 });
 
-
+const db = firebase.firestore();
 // Create Quiz Logic (for create-quiz.html) - Cập nhật để lưu lên Firestore và thêm điểm
 if (document.getElementById('quiz-form')) {
     const form = document.getElementById('quiz-form');
